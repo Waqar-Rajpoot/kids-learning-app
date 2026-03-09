@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Playful Kid Friendly Theme */
+    --background: 40 40% 98%;
+    --foreground: 222 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 15%;
+
+    --primary: 262 83% 58%; /* Purple */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 199 89% 48%; /* Blue */
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 142 71% 45%; /* Green */
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 210 20% 98%;
+    --muted-foreground: 215 16% 47%;
+
+    --border: 214 32% 91%;
+    --radius: 2rem; /* Extra rounded for kids */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Outfit', sans-serif;
+    background-color: #fdfdfd;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-black;
+    font-family: 'Baloo 2', cursive;
+    color: #1a1a1a;
+  }
+}
+
+/* Kid Cards - Big and Bouncy */
+.kid-card {
+  @apply bg-white rounded-[2.5rem] border-4 border-gray-50 shadow-md transition-all duration-300;
+}
+
+.kid-card:active {
+  @apply scale-95 shadow-inner border-primary/20 bg-primary/5;
+}
+
+/* Custom Utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Subtle Rounded Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; 
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1); 
+  border-radius: 20px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2); 
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes slow-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+.animate-slow-pulse {
+  animation: slow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-speed-in {
+  animation: fade-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Large touch targets */
+button, a {
+  @apply cursor-pointer select-none;
+  min-height: 54px;
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kid Learing</string>
+    <string name="title_activity_main">Kid Learing</string>
+    <string name="package_name">app.lovable.ac174a0743934dfc934888a1cef76330</string>
+    <string name="custom_url_scheme">app.lovable.ac174a0743934dfc934888a1cef76330</string>
+</resources>
