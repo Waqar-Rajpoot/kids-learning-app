@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Volume2, Music, ArrowLeft, Sparkles, User, LogOut, Mail, Edit2, Check, X } from 'lucide-react';
+import { Volume2, Music, ArrowLeft, Sparkles, User, LogOut, Mail, Edit2, Check, X, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '@/context/AppSettingsContext';
 import { auth } from '@/lib/firebase';
@@ -44,147 +44,154 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
-            <header className="px-6 pt-10 pb-6 flex items-center gap-4">
+        <div className="min-h-screen bg-[#0f172a] text-white selection:bg-primary/30 overflow-x-hidden">
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]" />
+            </div>
+
+            <header className="relative px-4 pt-8 pb-6 max-w-5xl mx-auto flex items-center gap-4">
                 <button
                     onClick={() => navigate('/')}
-                    className="p-3 glass rounded-2xl text-white/80 hover:text-white transition-all active:scale-90"
+                    className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all active:scale-95 shadow-xl shrink-0"
                 >
-                    <ArrowLeft className="w-6 h-6" />
+                    <ArrowLeft className="w-6 h-6 text-white/80" />
                 </button>
-                <h1 className="text-3xl font-extrabold tracking-tight font-display">
-                    Parents <span className="text-primary-foreground/80">Zone</span>
-                </h1>
+                <div>
+                    <h1 className="text-2xl font-black tracking-tight font-display bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                        Parents <span className="text-primary font-medium">Zone</span>
+                    </h1>
+                    <p className="text-white/40 text-[10px] font-medium flex items-center gap-1">
+                        <Shield className="w-3 h-3" /> Secure Management
+                    </p>
+                </div>
             </header>
 
-            <main className="px-6 space-y-8 py-4">
-                <div className="premium-card rounded-[2.5rem] p-8 glass flex items-center justify-between overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            <main className="relative px-4 max-w-5xl mx-auto space-y-6 pb-12">
+                {/* Profile Card */}
+                <div className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-3 sm:py-8 transition-all hover:border-white/20">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
                     
-                    <div className="flex items-center gap-6 relative z-10 w-full max-w-[80%]">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border-4 border-white/10 shadow-xl shrink-0">
-                            <User className="w-10 h-10 text-white fill-white/20" />
+                    <div className="flex flex-col md:flex-row items-center gap-4 relative z-10">
+                        {/* Avatar Section */}
+                        <div className="relative shrink-0">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary via-accent to-secondary p-1 shadow-2xl">
+                                <div className="w-full h-full rounded-full bg-[#1a2235] flex items-center justify-center overflow-hidden">
+                                    <User className="w-10 h-10 text-white/80" />
+                                </div> 
+                            </div>
+                            <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-[#0f172a] rounded-full" />
                         </div>
                         
-                        <div className="flex-1 min-w-0">
+                        {/* User Details & Enhanced Input */}
+                        <div className="flex-1 text-center md:text-left space-y-3 w-full min-w-0">
                             {isEditing ? (
-                                <div className="flex items-center gap-2 relative z-20">
+                                <div className="flex flex-col gap-3">
                                     <input 
                                         type="text"
                                         value={newName}
                                         onChange={(e) => setNewName(e.target.value)}
-                                        // Changed bg-white/10 to bg-neutral-800 for better contrast
-                                        // Added placeholder:text-white/40
-                                        className="bg-neutral-800 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 w-full font-display text-lg placeholder:text-white/40"
-                                        placeholder="Enter name..."
+                                        className="bg-white/10 border border-white/20 rounded-2xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 w-full font-display text-lg placeholder:text-white/30 shadow-inner"
+                                        placeholder="Enter your name"
                                         autoFocus
                                     />
-                                    <button 
-                                        onClick={handleUpdateProfile}
-                                        disabled={loading}
-                                        className="p-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors shrink-0"
-                                    >
-                                        <Check className="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        onClick={() => { setIsEditing(false); setNewName(currentUser?.displayName || ""); }}
-                                        className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors shrink-0"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
+                                    <div className="flex gap-2 w-full">
+                                        <button 
+                                            disabled={loading}
+                                            onClick={handleUpdateProfile} 
+                                            className="flex-1 py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-colors shadow-lg shadow-primary/20 flex items-center justify-center"
+                                        >
+                                            <Check className="w-5 h-5" />
+                                        </button>
+                                        <button 
+                                            onClick={() => { setIsEditing(false); setNewName(currentUser?.displayName || ""); }} 
+                                            className="flex-1 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors flex items-center justify-center"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-3">
-                                    <h2 className="text-2xl font-bold font-display capitalize truncate">
-                                        {currentUser?.displayName || "Little Explorer"}
-                                    </h2>
-                                    <button 
-                                        onClick={() => setIsEditing(true)}
-                                        className="p-1.5 bg-white/5 text-white/40 hover:text-primary hover:bg-white/10 rounded-lg transition-all"
-                                    >
-                                        <Edit2 className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                <>
+                                    <div className="flex items-center justify-center md:justify-start text-white/60 gap-2">
+                                        <h2 className="text-2xl font-bold font-display truncate text-white">
+                                            {currentUser?.displayName || "Explorer"}
+                                        </h2>
+                                        <button onClick={() => setIsEditing(true)} className="p-2 bg-white/10 text-white/60 rounded-xl hover:text-primary transition-colors">
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-center md:justify-start gap-2 text-white/60">
+                                        <Mail className="w-4 h-4 shrink-0" />
+                                        <p className="text-sm truncate">{currentUser?.email || "No email linked"}</p>
+                                    </div>
+                                </>
                             )}
-                            
-                            <div className="flex items-center gap-2 text-white/60 mt-1">
-                                <Mail className="w-3.5 h-3.5" />
-                                <p className="text-xs font-medium truncate">{currentUser?.email || "No email linked"}</p>
-                            </div>
                         </div>
+
+                        <button 
+                            onClick={handleLogout}
+                            className="w-full md:w-auto flex items-center justify-center gap-3 px-6 py-4 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-2xl transition-all border border-red-500/20 font-bold shrink-0"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span>Sign Out</span>
+                        </button>
                     </div>
-
-                    <button 
-                        onClick={handleLogout}
-                        className="p-4 bg-white/10 hover:bg-red-500/20 hover:text-red-400 rounded-2xl transition-all active:scale-95 group relative z-10"
-                        title="Logout"
-                    >
-                        <LogOut className="w-6 h-6" />
-                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <button
+                {/* Settings Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <SettingCard 
+                        title="Girl's Voice"
+                        desc="Sweet narrator for items"
+                        icon={<Volume2 className="w-5 h-5" />}
+                        active={settings.isGirlVoice}
                         onClick={() => updateSetting('isGirlVoice', !settings.isGirlVoice)}
-                        className="premium-card rounded-[2rem] p-8 glass flex flex-col justify-between h-56 border border-white/5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        <div className="flex justify-between items-start w-full">
-                            <div className="p-4 bg-primary/20 rounded-2xl">
-                                <Volume2 className="w-8 h-8 text-primary" />
-                            </div>
-                            <div className={`w-14 h-7 rounded-full relative p-1 transition-colors duration-300 ${settings.isGirlVoice ? 'bg-primary' : 'bg-white/10'}`}>
-                                <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 ${settings.isGirlVoice ? 'translate-x-7' : 'translate-x-0'}`}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-bold mb-2">Girl's Voice</h3>
-                            <p className="text-white/50 text-sm text-balance">Sweet narrator voice for all learning items</p>
-                        </div>
-                    </button>
-
-                    <button
+                        color="bg-primary"
+                    />
+                    <SettingCard 
+                        title="Music"
+                        desc="Play happy tunes"
+                        icon={<Music className="w-5 h-5" />}
+                        active={settings.bgMusic}
                         onClick={() => updateSetting('bgMusic', !settings.bgMusic)}
-                        className="premium-card rounded-[2rem] p-8 glass flex flex-col justify-between h-56 border border-white/5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        <div className="flex justify-between items-start w-full">
-                            <div className="p-4 bg-secondary/20 rounded-2xl">
-                                <Music className="w-8 h-8 text-secondary" />
-                            </div>
-                            <div className={`w-14 h-7 rounded-full relative p-1 transition-colors duration-300 ${settings.bgMusic ? 'bg-secondary' : 'bg-white/10'}`}>
-                                <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 ${settings.bgMusic ? 'translate-x-7' : 'translate-x-0'}`}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-bold mb-2">Background Music</h3>
-                            <p className="text-white/50 text-sm">Play happy tunes while learning</p>
-                        </div>
-                    </button>
-
-                    <button
+                        color="bg-secondary"
+                    />
+                    <SettingCard 
+                        title="Magic"
+                        desc="Sparkles on clicks"
+                        icon={<Sparkles className="w-5 h-5" />}
+                        active={settings.magicEffects}
                         onClick={() => updateSetting('magicEffects', !settings.magicEffects)}
-                        className="premium-card rounded-[2rem] p-8 glass flex flex-col justify-between h-56 border border-white/5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        <div className="flex justify-between items-start w-full">
-                            <div className="p-4 bg-amber-400/20 rounded-2xl">
-                                <Sparkles className="w-8 h-8 text-amber-400" />
-                            </div>
-                            <div className={`w-14 h-7 rounded-full relative p-1 transition-colors duration-300 ${settings.magicEffects ? 'bg-amber-400' : 'bg-white/10'}`}>
-                                <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 ${settings.magicEffects ? 'translate-x-7' : 'translate-x-0'}`}></div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-bold mb-2">Magic Effects</h3>
-                            <p className="text-white/50 text-sm">Fun glitter and sparkles on interactions</p>
-                        </div>
-                    </button>
-                </div>
-
-                <div className="text-center py-8">
-                    <p className="text-white/20 text-xs font-bold tracking-widest uppercase">Bright Beginnings v1.2 • Explorer ID: {currentUser?.uid.slice(0, 8)}...</p>
+                        color="bg-amber-400"
+                    />
                 </div>
             </main>
         </div>
     );
 };
+
+const SettingCard = ({ title, desc, icon, active, onClick, color }) => (
+    <button
+        onClick={onClick}
+        className={`group relative flex flex-col gap-4 p-5 rounded-[1.5rem] border transition-all duration-300 text-left w-full overflow-hidden ${
+            active ? `border-white/20 bg-white/5` : 'border-white/5 bg-white/[0.01]'
+        }`}
+    >
+        <div className="flex justify-between items-center w-full relative z-10">
+            <div className={`p-3 rounded-xl ${active ? `${color}/20 text-white` : 'bg-white/5 text-white/20'}`}>
+                {icon}
+            </div>
+            <div className={`w-10 h-5 rounded-full relative transition-colors ${active ? color : 'bg-white/10'}`}>
+                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${active ? 'left-6' : 'left-1'}`} />
+            </div>
+        </div>
+        <div className="relative z-10">
+            <h3 className={`font-bold transition-colors ${active ? 'text-white' : 'text-white/40'}`}>{title}</h3>
+            <p className="text-white/25 text-[11px] leading-tight">{desc}</p>
+        </div>
+        <div className={`absolute -top-10 -right-10 w-24 h-24 opacity-10 blur-2xl rounded-full transition-colors ${active ? color : 'bg-transparent'}`} />
+    </button>
+);
 
 export default SettingsPage;

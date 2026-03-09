@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { LucideIcon, Play, Star } from 'lucide-react';
+import { LucideIcon, Play, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { playTap } from '@/lib/sounds';
 
 interface ModuleCardProps {
   title: string;
@@ -19,75 +20,86 @@ const ModuleCard = ({
   emoji,
   description,
   path,
-  colorClass,
+  colorClass, // Expecting Tailwind colors like 'bg-primary' or 'bg-orange-500'
   Icon,
-  image,
   isNew,
   variant = 'small'
 }: ModuleCardProps) => {
   const navigate = useNavigate();
+  const isLarge = variant === 'large';
 
-  // Simplified color parsing for the light background
-  const getLightBg = (color: string) => {
-    if (color.includes('orange')) return 'bg-orange-50 text-orange-600 border-orange-100';
-    if (color.includes('indigo') || color.includes('purple')) return 'bg-purple-50 text-purple-600 border-purple-100';
-    if (color.includes('blue') || color.includes('cyan')) return 'bg-blue-50 text-blue-600 border-blue-100';
-    if (color.includes('emerald') || color.includes('teal')) return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-    if (color.includes('yellow') || color.includes('amber')) return 'bg-amber-50 text-amber-600 border-amber-100';
-    if (color.includes('pink') || color.includes('rose')) return 'bg-pink-50 text-pink-600 border-pink-100';
-    return 'bg-gray-50 text-gray-600 border-gray-100';
+  const handleClick = () => {
+    playTap();
+    navigate(path);
   };
 
-  const styleClasses = getLightBg(colorClass);
+  // Helper to extract text color from background class for the icon/glow
+  const getIconTextColor = (color: string) => {
+    if (color.includes('primary')) return 'text-primary';
+    const baseColor = color.replace('bg-', 'text-');
+    return baseColor;
+  };
+
+  const textColor = getIconTextColor(colorClass);
 
   return (
-    <button
-      onClick={() => navigate(path)}
-      className={`relative w-full text-left overflow-hidden rounded-[2rem] border ${styleClasses.split(' ').slice(2).join(' ')} 
-        ${variant === 'large' ? 'min-h-[160px]' : 'min-h-[130px]'} 
-        bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] active:scale-[0.97] transition-all duration-300 group hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1`}
+    <motion.button
+      onClick={handleClick}
+      whileHover={{ y: -5, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      className={`group relative w-full text-left overflow-hidden rounded-[2.5rem] border border-white/10 
+        ${isLarge ? 'min-h-[180px] p-8' : 'min-h-[140px] p-6'} 
+        bg-white/[0.03] backdrop-blur-2xl transition-all duration-500 shadow-2xl hover:border-white/20 hover:bg-white/[0.07]`}
     >
-      <div className="relative h-full flex flex-col justify-between p-6 z-10">
+      {/* Dynamic Background Glow - Uses the colorClass passed from Index */}
+      <div className={`absolute -top-20 -right-20 w-40 h-40 opacity-10 blur-[80px] rounded-full transition-opacity duration-700 group-hover:opacity-30 ${colorClass}`} />
+
+      <div className="relative h-full flex flex-col justify-between z-10">
         <div className="flex justify-between items-start">
-          <div className="space-y-1">
+          <div className="space-y-2 max-w-[70%]">
             {isNew && (
-              <span className="inline-flex items-center text-[10px] font-black bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-lg uppercase tracking-wider mb-2 animate-bounce">
-                New
+              <span className="inline-flex items-center text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-widest mb-2 shadow-lg shadow-primary/20 animate-pulse">
+                New Quest
               </span>
             )}
-            <h3 className={`font-black text-slate-800 leading-tight ${variant === 'large' ? 'text-2xl' : 'text-lg'}`}>
+            <h3 className={`font-black text-white leading-tight tracking-tight ${isLarge ? 'text-2xl' : 'text-xl'}`}>
               {title}
             </h3>
-            <p className="text-slate-500 text-xs font-bold leading-relaxed line-clamp-2 max-w-[200px]">
+            <p className="text-white/40 text-xs font-medium leading-relaxed line-clamp-2">
               {description}
             </p>
           </div>
 
-          <div className={`p-4 rounded-2xl ${styleClasses.split(' ')[0]} ${styleClasses.split(' ')[1]} transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-sm`}>
-            <Icon className="w-6 h-6" />
+          {/* Icon Box with Theme Color */}
+          <div className={`p-4 rounded-[1.2rem] bg-white/5 border border-white/10 ${textColor} transition-all duration-500 group-hover:scale-110 group-hover:bg-white/10 shadow-xl`}>
+            <Icon className={`${isLarge ? 'w-8 h-8' : 'w-6 h-6'}`} />
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
-          <div className={`p-2.5 rounded-full ${styleClasses.split(' ')[0]} ${styleClasses.split(' ')[1]} shadow-sm group-hover:scale-110 transition-transform`}>
-            <Play className="w-4 h-4 fill-current" />
+        <div className="mt-6 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={`p-2 rounded-lg bg-white/5 border border-white/10 ${textColor} group-hover:bg-primary group-hover:text-white transition-all`}>
+              <Play className="w-3 h-3 fill-current" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30 group-hover:text-white/60 transition-colors">
+              Tap to enter
+            </span>
           </div>
-          <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Tap to play</span>
+
+          {/* Emoji Floating slightly */}
+          {emoji && (
+            <span className={`transform transition-transform duration-500 group-hover:scale-125 group-hover:-rotate-12 ${isLarge ? 'text-4xl' : 'text-2xl'}`}>
+              {emoji}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Premium Decoration (Emoji) */}
-      <div className="absolute right-[-15px] bottom-[-15px] opacity-[0.07] pointer-events-none group-hover:scale-125 group-hover:rotate-12 transition-transform duration-700 ease-out">
-        {emoji ? (
-          <span className="text-9xl">{emoji}</span>
-        ) : (
-          <Icon className="w-40 h-40" />
-        )}
+      {/* Decorative Chevron */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-20 transition-opacity">
+        <ChevronRight className="w-12 h-12 text-white" />
       </div>
-
-      {/* Soft Glow Effect on Hover */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-    </button>
+    </motion.button>
   );
 };
 
