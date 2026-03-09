@@ -78,11 +78,6 @@ const AppContent = () => {
       <BrowserRouter>
         {/* The Outer Wrapper: Swaps background color based on user state */}
         <div className={`min-h-screen flex flex-col items-center justify-start overflow-x-hidden selection:bg-primary/20 transition-colors duration-500 ${!user ? 'bg-[#0f172a]' : 'bg-[#f8f9ff]'}`}>
-          
-          {/* The Inner Container: 
-              - If NO USER: Full width, transparent, no shadow (Auth Pages)
-              - If USER: Max-width 480px, white background, shadow (App Pages)
-          */}
           <div className={`w-full relative flex flex-col transition-all duration-500 ${
             !user 
               ? 'max-w-none min-h-screen bg-transparent' 

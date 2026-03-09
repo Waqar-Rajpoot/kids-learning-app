@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Trophy, Palette, Home } from 'lucide-react';
+import { Check, Trophy, Palette, Home, Sparkles, Zap } from 'lucide-react';
 import { speakText } from '@/lib/speech';
 import { playTap, playCorrect, playWrong, playCelebration } from '@/lib/sounds';
 import { rainbowBurst } from '@/lib/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const levels = [
   { colors: ['#FF0000', '#00FF00', '#0000FF'], names: ['Red', 'Green', 'Blue'] },
@@ -32,13 +33,12 @@ const ColorMatchPage = () => {
   const handleColorClick = (color: string) => {
     if (matches[color]) return;
     playTap();
-    speakText('Now pick the name!');
     setSelectedColor(color);
   };
 
   const handleNameClick = (name: string) => {
     if (!selectedColor) {
-      speakText('First tap a color!');
+      speakText('Pick a color first!');
       return;
     }
     playTap();
@@ -52,115 +52,163 @@ const ColorMatchPage = () => {
       const newMatches = { ...matches, [selectedColor]: name };
       setMatches(newMatches);
       setSelectedColor(null);
-      speakText('Correct! That is ' + name + '!');
-
+      
       if (Object.keys(newMatches).length === currentLevel.colors.length) {
         setIsWon(true);
         playCelebration();
         rainbowBurst();
-        speakText('Wonderful! You know your colors!');
+        speakText('Mission Complete! Color spectrum stabilized.');
       }
     } else {
       playWrong();
-      speakText('Oops! Try again!');
+      speakText('Identity mismatch! Try again.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-amber-50 flex flex-col">
+    <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
+      
+      {/* Dynamic Background Glow */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-orange-500/5 blur-[120px] rounded-full" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm">
-        <div className="max-w-md mx-auto px-5 py-3 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="p-2 text-orange-600 active:scale-95 bg-orange-50 rounded-xl">
+      <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
+        <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
+          <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
             <Home className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
-              <Palette className="w-5 h-5 text-white" />
+          
+          <div className="text-center">
+            <h1 className="text-xl font-black italic tracking-tighter uppercase">Spectrum Lab</h1>
+            <div className="flex items-center justify-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+              <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">Analysis Active</span>
             </div>
-            <h1 className="text-lg font-black text-gray-900">Color Match</h1>
           </div>
-          <div className="px-4 py-1.5 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full shadow-lg">
-            <span className="text-white font-black text-sm">Lv {level + 1}</span>
+
+          <div className={`px-5 py-2 bg-white/5 border border-white/10 rounded-2xl`}>
+            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{level + 1}</span>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-md mx-auto w-full px-5 py-6 flex flex-col gap-6">
-        {/* Instructions */}
-        <div className="bg-white p-5 rounded-2xl border border-orange-100 shadow-sm flex items-center gap-4">
-          <span className="text-4xl">🎨</span>
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
+        
+        {/* Instruction Banner */}
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] border border-white/10 shadow-2xl flex items-center gap-5"
+        >
+          <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+            <Palette className="w-7 h-7 text-white" />
+          </div>
           <div>
-            <h2 className="font-black text-gray-900">Tap a color, then its name!</h2>
-            <p className="text-gray-500 text-sm font-medium">Match all colors to win!</p>
+            <h2 className="text-lg font-black text-white leading-tight italic uppercase">Sync Identity</h2>
+            <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Connect data color to name label</p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Game Area */}
-        <div className="bg-white p-6 rounded-[2rem] border-2 border-orange-100 shadow-xl">
-          <div className="flex gap-6">
-            {/* Colors Column */}
-            <div className="flex flex-col gap-4 flex-1">
-              <p className="text-xs font-black text-gray-400 uppercase text-center mb-1">Colors</p>
-              {levels[level].colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorClick(color)}
-                  disabled={!!matches[color]}
-                  className={`h-16 rounded-2xl border-4 transition-all duration-200 ${selectedColor === color
-                    ? 'border-gray-800 scale-105 shadow-xl ring-4 ring-gray-200'
-                    : 'border-transparent shadow-md'
-                    } ${matches[color] ? 'opacity-30 grayscale' : 'active:scale-95'}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-
-            {/* Names Column */}
-            <div className="flex flex-col gap-4 flex-1">
-              <p className="text-xs font-black text-gray-400 uppercase text-center mb-1">Names</p>
-              {shuffledNames.map((name) => {
-                const isMatched = Object.values(matches).includes(name);
-                return (
-                  <button
-                    key={name}
-                    onClick={() => !isMatched && handleNameClick(name)}
-                    disabled={isMatched}
-                    className={`h-16 rounded-2xl border-2 flex items-center justify-center 
-                      font-black text-sm transition-all duration-200 ${isMatched
-                        ? 'border-green-400 text-green-600 bg-green-50'
-                        : 'border-gray-200 text-gray-700 bg-gray-50 active:bg-orange-50 active:border-orange-300 active:scale-95'
-                      }`}
-                  >
-                    {name}
-                    {isMatched && <Check className="ml-2 w-5 h-5" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Win Modal */}
-        {isWon && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-            <div className="bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center space-y-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center shadow-xl">
-                <Trophy className="w-12 h-12 text-white" />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-gray-900 mb-2">🌟 Amazing!</h3>
-                <p className="text-gray-500 font-bold">You're a Color Expert!</p>
-              </div>
-              <button
-                onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
-                className="w-full py-4 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all"
+        {/* Interaction Grid */}
+        <div className="flex-1 flex gap-6 py-4">
+          
+          {/* Colors Column */}
+          <div className="flex flex-col gap-4 flex-1">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] text-center">Data Input</p>
+            {levels[level].colors.map((color, idx) => (
+              <motion.button
+                key={color}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => handleColorClick(color)}
+                disabled={!!matches[color]}
+                className={`relative h-24 rounded-[2rem] transition-all duration-300 group overflow-hidden border-4
+                  ${selectedColor === color 
+                    ? 'border-white scale-105 shadow-[0_0_30px_rgba(255,255,255,0.2)]' 
+                    : 'border-transparent'
+                  }
+                  ${matches[color] ? 'opacity-20 scale-90 grayscale' : 'active:scale-95'}
+                `}
               >
-                {level < levels.length - 1 ? 'Next Level' : 'Play Again'}
-              </button>
-            </div>
+                <div className="absolute inset-0" style={{ backgroundColor: color }} />
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
+                {selectedColor === color && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Zap className="w-8 h-8 text-white animate-bounce" />
+                  </div>
+                )}
+                {matches[color] && (
+                  <div className="absolute inset-0 bg-[#0f172a]/60 backdrop-blur-[2px] flex items-center justify-center">
+                    <Check className="w-8 h-8 text-white/50" />
+                  </div>
+                )}
+              </motion.button>
+            ))}
           </div>
-        )}
+
+          {/* Names Column */}
+          <div className="flex flex-col gap-4 flex-1">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] text-center">ID Labels</p>
+            {shuffledNames.map((name, idx) => {
+              const isMatched = Object.values(matches).includes(name);
+              return (
+                <motion.button
+                  key={name}
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  onClick={() => !isMatched && handleNameClick(name)}
+                  disabled={isMatched}
+                  className={`h-24 rounded-[2rem] border-2 flex items-center justify-center transition-all duration-300
+                    font-black text-lg uppercase italic tracking-tighter
+                    ${isMatched 
+                      ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' 
+                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:border-white/20 hover:text-white'
+                    }
+                  `}
+                >
+                  {name}
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Victory Modal */}
+        <AnimatePresence>
+          {isWon && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-xl flex items-center justify-center z-[100] p-6"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-white/5 w-full max-w-sm p-10 rounded-[3.5rem] border border-white/10 shadow-3xl text-center space-y-8"
+              >
+                <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-400 to-amber-600 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20">
+                  <Trophy className="w-14 h-14 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <h3 className="text-4xl font-black text-white italic tracking-tighter mb-2 uppercase">Lab Success!</h3>
+                  <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">All spectrum data synchronized</p>
+                </div>
+                
+                <button
+                  onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
+                  className="w-full py-6 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all border border-white/20 uppercase italic tracking-widest"
+                >
+                  {level < levels.length - 1 ? 'Next Sector' : 'Restart Lab'}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

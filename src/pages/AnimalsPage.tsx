@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, Sparkles } from 'lucide-react';
+import { Home, Sparkles, LayoutGrid } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import LearningCard from '@/components/LearningCard';
 import CategoryTabs from '@/components/CategoryTabs';
 import { animals, birds, fruits } from '@/data/learningData';
@@ -27,64 +28,62 @@ const AnimalsPage = () => {
 
   const getCategoryGradient = () => {
     switch (activeCategory) {
-      case 'animals': return 'from-amber-400 via-orange-400 to-red-400';
-      case 'birds': return 'from-cyan-400 via-blue-400 to-purple-400';
-      case 'fruits': return 'from-green-400 via-emerald-400 to-teal-400';
+      case 'animals': return 'from-orange-500 to-amber-400';
+      case 'birds': return 'from-cyan-500 to-blue-400';
+      case 'fruits': return 'from-emerald-500 to-green-400';
       default: return 'from-primary to-purple-500';
     }
   };
 
-  const getCategoryEmoji = () => {
-    switch (activeCategory) {
-      case 'animals': return '🦁';
-      case 'birds': return '🦜';
-      case 'fruits': return '🍎';
-      default: return '✨';
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 font-display">
-      {/* Decorative Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className={`absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br ${getCategoryGradient()} rounded-full opacity-20 blur-3xl`} />
-        <div className={`absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br ${getCategoryGradient()} rounded-full opacity-20 blur-3xl`} />
+    <div className="min-h-screen flex flex-col bg-[#0f172a] text-white font-display relative overflow-hidden">
+      
+      {/* 1. Background Aura (Fixed) */}
+      <div className="fixed inset-0 pointer-events-none">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.15, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.8 }}
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br ${getCategoryGradient()} rounded-full blur-[160px]`}
+          />
+        </AnimatePresence>
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 px-4 py-4">
-        <div className="flex items-center justify-between w-full max-w-lg mx-auto">
-          <button
-            onClick={() => { playTap(); navigate('/'); }}
-            className="w-12 h-12 flex items-center justify-center text-slate-500 dark:text-slate-400 active:scale-90 bg-white dark:bg-slate-700 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-sm transition-all hover:shadow-md"
-          >
-            <Home className="w-5 h-5" />
-          </button>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-2xl">{getCategoryEmoji()}</span>
-              <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">
-                Discovery
+      {/* 2. STICKY TOP SECTION (Header + Tabs) */}
+      <div className="sticky top-0 z-50 flex flex-col">
+        {/* Header */}
+        <header className="bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 px-4 py-4">
+          <div className="flex items-center justify-between w-full max-w-lg mx-auto">
+            <button
+              onClick={() => { playTap(); navigate('/'); }}
+              className="w-12 h-12 flex items-center justify-center text-white/70 active:scale-90 bg-white/5 rounded-2xl border border-white/10 shadow-xl transition-all hover:bg-white/10"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+            
+            <div className="text-center">
+              <h1 className="text-xl font-black text-white tracking-tight flex items-center gap-2 justify-center uppercase italic">
+                Discovery <LayoutGrid className="w-4 h-4 text-primary" />
               </h1>
+              <div className="flex items-center justify-center gap-1.5 mt-0.5">
+                <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                  Explore {activeCategory}
+                </p>
+                <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-1.5 mt-0.5">
-              <Sparkles className="w-3 h-3 text-primary" />
-              <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                {activeCategory}
-              </p>
-              <Sparkles className="w-3 h-3 text-primary" />
-            </div>
+            
+            <div className="w-12" />
           </div>
-          
-          <div className="w-12" />
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1 px-4 py-6 pb-24 overflow-y-auto no-scrollbar">
-        <div className="max-w-lg mx-auto">
-          {/* Category Tabs */}
-          <div className="mb-6">
+        {/* Category Tabs (Integrated into sticky stack) */}
+        <div className="bg-[#0f172a]/40 backdrop-blur-lg px-4 py-3 border-b border-white/5">
+          <div className="max-w-lg mx-auto bg-black/40 p-1 rounded-[2rem] border border-white/10 shadow-2xl">
             <CategoryTabs
               categories={categories}
               activeCategory={activeCategory}
@@ -94,39 +93,58 @@ const AnimalsPage = () => {
               }}
             />
           </div>
+        </div>
+      </div>
 
-          {/* Items Count Badge */}
-          <div className="flex justify-center mb-6">
-            <div className={`px-4 py-2 bg-gradient-to-r ${getCategoryGradient()} rounded-full shadow-lg`}>
-              <span className="text-white text-sm font-bold">
-                {getItems().length} {activeCategory} to explore! 🎉
-              </span>
-            </div>
+      {/* 3. SCROLLABLE CONTENT AREA */}
+      <main className="flex-1 px-4 py-6 pb-24 relative z-10 scrollbar-hide">
+        <div className="max-w-lg mx-auto">
+          
+          {/* Stats Badge - Now clearly separated in the main flow */}
+          <div className="flex justify-center mb-10">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={activeCategory + "stats"}
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className={`px-6 py-2.5 bg-gradient-to-r ${getCategoryGradient()} rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/20`}
+              >
+                <span className="text-white text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                  {getItems().length} {activeCategory} unlocked 🎉
+                </span>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Grid of Items */}
-          <div className="grid grid-cols-2 gap-4">
-            {getItems().map((item, index) => (
-              <div
-                key={item.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 30}ms` }}
-              >
-                <LearningCard
-                  id={item.id}
-                  name={item.name}
-                  emoji={item.emoji}
-                  color={item.color}
-                  category={activeCategory}
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-5">
+            <AnimatePresence mode="popLayout">
+              {getItems().map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                  transition={{ delay: index * 0.04, type: "spring", stiffness: 200, damping: 20 }}
+                >
+                  <LearningCard
+                    id={item.id}
+                    name={item.name}
+                    emoji={item.emoji}
+                    color={item.color}
+                    category={activeCategory}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       </main>
 
       {/* Bottom Safe Area */}
-      <div className="h-20" />
+      <div className="h-10 shrink-0 pointer-events-none" />
     </div>
   );
 };

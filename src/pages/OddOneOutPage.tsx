@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Zap, Home } from 'lucide-react';
+import { Trophy, Zap, Home, ShieldAlert, Fingerprint, Sparkles } from 'lucide-react';
 import { speakText } from '@/lib/speech';
-import { playTap, playCorrect, playWrong, playCelebration } from '@/lib/sounds';
+import { playTap, playWrong, playCelebration } from '@/lib/sounds';
 import { starBurst } from '@/lib/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const levels = [
   { items: ['🍎', '🍎', '🍌', '🍎'], odd: 2, msg: 'Banana is the odd one!' },
@@ -29,7 +30,7 @@ const OddOneOutPage = () => {
     setSelected(null);
     setWrongPick(null);
     setIsWon(false);
-    speakText('Find the different one!');
+    speakText('Locate the anomaly!');
   }, [level]);
 
   const handleItemClick = (index: number) => {
@@ -41,86 +42,138 @@ const OddOneOutPage = () => {
       setIsWon(true);
       playCelebration();
       starBurst();
-      speakText('Correct! ' + levels[level].msg);
+      speakText('Anomaly neutralized! ' + levels[level].msg);
     } else {
       playWrong();
       setWrongPick(index);
-      speakText('Oops! Try again!');
+      speakText('Negative. Try again.');
       setTimeout(() => setWrongPick(null), 500);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-green-50 flex flex-col">
-      {/* Header - Back Button Removed */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm h-16 flex items-center">
-        <div className="max-w-md mx-auto px-5 flex items-center justify-between w-full">
-          <button onClick={() => navigate('/')} className="p-2 text-emerald-600 active:scale-95 bg-emerald-50 rounded-xl">
+    <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
+      
+      {/* 1. Cyber-Glow Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[10%] left-[-5%] w-[60%] h-[60%] bg-emerald-500/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-green-500/5 blur-[100px] rounded-full" />
+      </div>
+
+      {/* 2. Command Header */}
+      <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
+        <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
+          <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
             <Home className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
-              <Zap className="w-5 h-5 text-white" />
+          
+          <div className="text-center">
+            <h1 className="text-xl font-black italic tracking-tighter uppercase">Anomaly Radar</h1>
+            <div className="flex items-center justify-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Scanning Area</span>
             </div>
-            <h1 className="text-lg font-black text-gray-900">Odd One Out</h1>
           </div>
-          <div className="px-4 py-1.5 bg-emerald-100 rounded-full">
-            <span className="text-emerald-600 font-black text-xs uppercase tracking-tight">Lv {level + 1}</span>
+
+          <div className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl">
+            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{level + 1}</span>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-md mx-auto w-full px-5 py-6 flex flex-col gap-6 animate-speed-in">
-        {/* Instructions */}
-        <div className="bg-white p-5 rounded-[2rem] border border-emerald-100 shadow-sm flex items-center gap-4">
-          <span className="text-4xl">🕵️</span>
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
+        
+        {/* 3. Mission Status Module */}
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] border border-white/10 shadow-2xl flex items-center gap-5"
+        >
+          <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <ShieldAlert className="w-7 h-7 text-white" />
+          </div>
           <div>
-            <h2 className="font-black text-gray-900 leading-tight">Find the different one!</h2>
-            <p className="text-gray-500 text-sm font-medium">Tap the odd object!</p>
+            <h2 className="text-lg font-black leading-tight italic uppercase text-white">Detect Anomaly</h2>
+            <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Identify the divergent object</p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Game Grid */}
-        <div className="bg-white p-8 rounded-[2.5rem] border-2 border-emerald-50 shadow-xl">
-          <div className="grid grid-cols-2 gap-5 text-center">
-            {levels[level].items.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleItemClick(idx)}
-                className={`aspect-square rounded-[2rem] border-4 transition-all duration-300 
-                                    flex items-center justify-center text-7xl ${selected === idx
-                    ? 'border-emerald-500 bg-emerald-50 scale-105 shadow-xl shadow-emerald-200'
-                    : wrongPick === idx
-                      ? 'border-red-400 bg-red-50 scale-95'
-                      : 'border-white bg-gray-50 active:scale-95 active:border-emerald-200 shadow-md'
-                  }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* 4. Scanner Grid */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="bg-white/[0.02] p-8 rounded-[3.5rem] border-2 border-white/5 shadow-inner w-full">
+            <div className="grid grid-cols-2 gap-5">
+              {levels[level].items.map((item, idx) => (
+                <motion.button
+                  key={idx}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  onClick={() => handleItemClick(idx)}
+                  className={`aspect-square rounded-[2.5rem] border-4 transition-all duration-300 relative overflow-hidden
+                    flex items-center justify-center text-7xl 
+                    ${selected === idx
+                      ? 'border-emerald-500 bg-emerald-500/10 scale-105 shadow-[0_0_40px_rgba(16,185,129,0.3)]'
+                      : wrongPick === idx
+                        ? 'border-red-500/50 bg-red-500/10 scale-95 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+                        : 'border-white/5 bg-white/5 active:scale-95 active:border-emerald-500/30 hover:bg-white/[0.08]'
+                    }`}
+                >
+                  <span className="z-10 drop-shadow-2xl">{item}</span>
+                  
+                  {/* Digital Overlay */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-2 left-4 text-[8px] font-black text-white/10 uppercase tracking-tighter">
+                      ID-{1024 + idx}
+                    </div>
+                    <Fingerprint className="absolute bottom-4 right-4 w-6 h-6 text-white/5 opacity-40" />
+                  </div>
 
-        {/* Win Modal */}
-        {isWon && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6 animate-fade-in">
-            <div className="bg-white w-full max-w-sm p-8 rounded-[3rem] shadow-2xl text-center space-y-6 animate-speed-in">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-xl">
-                <Trophy className="w-12 h-12 text-white" />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-gray-900 mb-2 font-display leading-tight">🎯 Perfect!</h3>
-                <p className="text-gray-500 font-bold leading-relaxed">{levels[level].msg}</p>
-              </div>
-              <button
-                onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
-                className="w-full py-5 bg-gradient-to-r from-emerald-400 to-green-500 text-white rounded-[2rem] font-black text-xl shadow-lg active:scale-95 transition-all"
-              >
-                {level < levels.length - 1 ? 'Next Level' : 'Jump Again'}
-              </button>
+                  {selected === idx && (
+                    <motion.div 
+                      layoutId="target"
+                      className="absolute inset-0 border-2 border-emerald-400/50 rounded-[2rem] animate-pulse"
+                    />
+                  )}
+                </motion.button>
+              ))}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* 5. Victory Interface */}
+        <AnimatePresence>
+          {isWon && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#0f172a]/90 backdrop-blur-xl flex items-center justify-center z-[100] p-6"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-white/5 w-full max-w-sm p-10 rounded-[3.5rem] border border-white/10 shadow-3xl text-center space-y-8"
+              >
+                <div className="w-28 h-28 mx-auto bg-gradient-to-br from-emerald-400 to-green-600 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20">
+                  <Trophy className="w-14 h-14 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <h3 className="text-4xl font-black text-white italic tracking-tighter mb-2 uppercase leading-none">Target Locked</h3>
+                  <p className="text-emerald-400/80 font-bold uppercase tracking-widest text-[10px] bg-emerald-500/10 py-2 rounded-full px-4 inline-block">
+                    {levels[level].msg}
+                  </p>
+                </div>
+                
+                <button
+                  onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
+                  className="w-full py-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all border border-white/20 uppercase italic tracking-widest"
+                >
+                  {level < levels.length - 1 ? 'Next Sector' : 'Restart Hunt'}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
