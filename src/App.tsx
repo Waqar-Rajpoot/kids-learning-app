@@ -12,7 +12,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "./lib/firebase";
 
 // Auth Components
-import { LoginForm } from "./components/auth/LoginFrom"; // Fixed typo: LoginFrom -> LoginForm
+import { LoginForm } from "./components/auth/LoginFrom"; 
 import { RegisterForm } from "./components/auth/RegisterForm";
 
 // Page Components
@@ -44,13 +44,11 @@ const AppContent = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Firebase Auth Listener
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
 
-    // 2. Android Back Button Listener
     const backListener = CapApp.addListener('backButton', ({ canGoBack }) => {
       if (!canGoBack || showWelcome) {
         CapApp.exitApp();
@@ -65,54 +63,49 @@ const AppContent = () => {
     };
   }, [showWelcome]);
 
-  // Show a loading screen while Firebase checks session status
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <div className="animate-bounce text-primary font-bold text-xl">Loading Adventure...</div>
+      <div className="h-screen flex items-center justify-center bg-[#0f172a]">
+        <div className="animate-pulse text-primary font-black text-2xl tracking-widest uppercase">
+          Loading Adventure...
+        </div>
       </div>
     );
   }
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-[#f8f9ff] flex flex-col items-center justify-start overflow-x-hidden selection:bg-primary/20">
-        <div className="w-full max-w-[480px] min-h-screen bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.1)] relative flex flex-col">
-          <BackgroundMusic />
-          <Toaster />
-          <Sonner />
+      <BrowserRouter>
+        {/* The Outer Wrapper: Swaps background color based on user state */}
+        <div className={`min-h-screen flex flex-col items-center justify-start overflow-x-hidden selection:bg-primary/20 transition-colors duration-500 ${!user ? 'bg-[#0f172a]' : 'bg-[#f8f9ff]'}`}>
           
-          {showWelcome ? (
-            <WelcomePage onFinish={() => setShowWelcome(false)} />
-          ) : (
-            <BrowserRouter>
+          {/* The Inner Container: 
+              - If NO USER: Full width, transparent, no shadow (Auth Pages)
+              - If USER: Max-width 480px, white background, shadow (App Pages)
+          */}
+          <div className={`w-full relative flex flex-col transition-all duration-500 ${
+            !user 
+              ? 'max-w-none min-h-screen bg-transparent' 
+              : 'max-w-[480px] min-h-screen bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.1)]'
+          }`}>
+            
+            <BackgroundMusic />
+            <Toaster />
+            <Sonner />
+            
+            {showWelcome ? (
+              <WelcomePage onFinish={() => setShowWelcome(false)} />
+            ) : (
               <div className="flex-1 flex flex-col relative overflow-hidden">
                 <Routes>
-                  {/* --- PUBLIC ROUTES (Only accessible if NOT logged in) --- */}
                   {!user ? (
                     <>
-                      <Route path="/login" element={
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50">
-                          <LoginForm />
-                          <p className="mt-4 text-sm text-muted-foreground">
-                            New explorer? <Link to="/register" className="text-primary font-bold">Sign Up</Link>
-                          </p>
-                        </div>
-                      } />
-                      
-                      <Route path="/register" element={
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50">
-                          <RegisterForm />
-                          <p className="mt-4 text-sm text-muted-foreground">
-                            Already have an account? <Link to="/login" className="text-primary font-bold">Login</Link>
-                          </p>
-                        </div>
-                      } />
-                      {/* Redirect any other path to login if not authenticated */}
+                      {/* AUTH ROUTES: No wrappers with bg-slate-50 here anymore */}
+                      <Route path="/login" element={<LoginForm />} />
+                      <Route path="/register" element={<RegisterForm />} />
                       <Route path="*" element={<Navigate to="/login" replace />} />
                     </>
                   ) : (
-                    /* --- PRIVATE ROUTES (Only accessible if logged in) --- */
                     <>
                       <Route path="/" element={<Index />} />
                       <Route path="/animals" element={<AnimalsPage />} />
@@ -122,34 +115,28 @@ const AppContent = () => {
                       <Route path="/fruits" element={<AnimalsPage />} />
                       <Route path="/fruits/:category/:id" element={<ItemDetailPage />} />
                       <Route path="/poems" element={<PoemsPage />} />
-
-                      {/* Logic Games Routes */}
                       <Route path="/puzzles" element={<GamesMenuPage />} />
                       <Route path="/puzzles/memory" element={<MemoryMatchPage />} />
                       <Route path="/puzzles/colors" element={<ColorMatchPage />} />
                       <Route path="/puzzles/shadows" element={<ShadowMatchPage />} />
                       <Route path="/puzzles/odd-one" element={<OddOneOutPage />} />
                       <Route path="/puzzles/dots" element={<DotConnectPage />} />
-
                       <Route path="/alphabets" element={<AlphabetsPage />} />
                       <Route path="/spelling" element={<SpellingPage />} />
                       <Route path="/numbers" element={<NumbersPage />} />
                       <Route path="/drawing" element={<DrawingPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
-                      
-                      {/* Redirect authenticated users away from login/register back to home */}
                       <Route path="/login" element={<Navigate to="/" replace />} />
                       <Route path="/register" element={<Navigate to="/" replace />} />
-                      
                       <Route path="*" element={<NotFound />} />
                     </>
                   )}
                 </Routes>
               </div>
-            </BrowserRouter>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      </BrowserRouter>
     </TooltipProvider>
   );
 }
