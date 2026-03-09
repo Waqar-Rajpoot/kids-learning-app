@@ -9,7 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Added to ensure compatibility with your Vite/TS setup
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
