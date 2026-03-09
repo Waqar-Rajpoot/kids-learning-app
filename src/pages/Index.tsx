@@ -1,20 +1,81 @@
-import { useNavigate } from 'react-router-dom';
-import { Dog, BookOpen, Puzzle, Type, Hash, Palette, Cat, Sparkles, Languages, LogOut, Shield } from 'lucide-react';
-import ModuleCard from '@/components/ModuleCard';
-import { motion } from 'framer-motion';
-import { playTap } from '@/lib/sounds';
-import { auth } from '@/lib/firebase';
-import { AuthService } from '@/services/auth.service';
-import { toast } from 'sonner';
+import { useNavigate } from "react-router-dom";
+import {
+  Dog,
+  BookOpen,
+  Puzzle,
+  Type,
+  Hash,
+  Palette,
+  Cat,
+  Sparkles,
+  Languages,
+  LogOut,
+  Shield,
+} from "lucide-react";
+import ModuleCard from "@/components/ModuleCard";
+import { motion } from "framer-motion";
+import { playTap } from "@/lib/sounds";
+import { auth } from "@/lib/firebase";
+import { AuthService } from "@/services/auth.service";
+import { toast } from "sonner";
 
 const modules = [
-  { title: 'ABC Learning', description: 'Learn to write A-Z', path: '/alphabets', colorClass: 'bg-primary', Icon: Languages, emoji: '🅰️' },
-  { title: 'Animals', description: 'Discovery wildlife', path: '/animals', colorClass: 'bg-orange-500', Icon: Dog, emoji: '🐼' },
-  { title: 'Poems', description: '10 Story Books', path: '/poems', colorClass: 'bg-indigo-600', Icon: BookOpen, emoji: '🧙' },
-  { title: 'Logic Games', description: 'Puzzles & Colors', path: '/puzzles', colorClass: 'bg-blue-500', Icon: Puzzle, emoji: '🤖' },
-  { title: 'Spelling', description: 'Play with letters', path: '/spelling', colorClass: 'bg-emerald-500', Icon: Type, emoji: '✏️' },
-  { title: 'Numbers', description: 'Count 1 to 10', path: '/numbers', colorClass: 'bg-yellow-400', Icon: Hash, emoji: '🔢' },
-  { title: 'Drawing', description: 'Art Studio', path: '/drawing', colorClass: 'bg-pink-500', Icon: Palette, emoji: '🎨' },
+  {
+    title: "ABC Learning",
+    description: "Learn to write A-Z",
+    path: "/alphabets",
+    colorClass: "bg-primary",
+    Icon: Languages,
+    emoji: "🅰️",
+  },
+  {
+    title: "Logic Games",
+    description: "Puzzles & Colors",
+    path: "/puzzles",
+    colorClass: "bg-blue-500",
+    Icon: Puzzle,
+    emoji: "🤖",
+  },
+  {
+    title: "Animals",
+    description: "Discovery wildlife",
+    path: "/animals",
+    colorClass: "bg-orange-500",
+    Icon: Dog,
+    emoji: "🐼",
+  },
+  {
+    title: "Poems",
+    description: "10 Story Books",
+    path: "/poems",
+    colorClass: "bg-indigo-600",
+    Icon: BookOpen,
+    emoji: "🧙",
+  },
+  {
+    title: "Numbers",
+    description: "Count 1 to 10",
+    path: "/numbers",
+    colorClass: "bg-yellow-400",
+    Icon: Hash,
+    emoji: "🔢",
+  },
+  {
+    title: "Drawing",
+    description: "Art Studio",
+    path: "/drawing",
+    colorClass: "bg-pink-500",
+    Icon: Palette,
+    emoji: "🎨",
+  },
+  {
+    title: "Spelling",
+    description: "Play with letters",
+    path: "/spelling",
+    colorClass: "bg-emerald-500",
+    Icon: Type,
+    emoji: "✏️",
+  },
 ];
 
 const Index = () => {
@@ -43,21 +104,24 @@ const Index = () => {
       <header className="relative px-4 pt-8 pb-6 max-w-5xl mx-auto flex items-center justify-between z-50">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl">
-             <Sparkles className="w-6 h-6 text-primary" />
+            <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
               Bright <span className="text-primary font-medium">Learning</span>
             </h1>
             <p className="text-white/40 text-[10px] font-medium flex items-center gap-1">
-               <Shield className="w-3 h-3" /> Secure Learning Environment
+              <Shield className="w-3 h-3" /> Secure Learning Environment
             </p>
           </div>
         </div>
 
         <div className="flex gap-2">
-           <button
-            onClick={() => { playTap(); navigate('/settings'); }}
+          <button
+            onClick={() => {
+              playTap();
+              navigate("/settings");
+            }}
             className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all active:scale-95 text-white/70"
           >
             <Cat className="w-6 h-6" />
@@ -79,7 +143,7 @@ const Index = () => {
           className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-8 transition-all hover:border-white/20 shadow-2xl"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-          
+
           <div className="relative z-10">
             <h2 className="text-3xl font-black mb-2 font-display text-white tracking-tight">
               Hi, <span className="text-primary">{userName}</span>!
@@ -102,7 +166,7 @@ const Index = () => {
             >
               <ModuleCard
                 {...module}
-                // We keep the logic for large/small, but ModuleCard should 
+                // We keep the logic for large/small, but ModuleCard should
                 // now use the same glassmorphic classes as SettingCard
                 variant={idx === 0 ? "large" : "small"}
               />
