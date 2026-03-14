@@ -162,6 +162,7 @@ export const spellingWords = [
   { id: '1', word: 'CAT', emoji: '🐱', hint: 'Meow' }, { id: '2', word: 'DOG', emoji: '🐕', hint: 'Woof' }, { id: '3', word: 'SUN', emoji: '☀️', hint: 'Bright' }
 ];
 
+
 export const numbers = [
   { num: 1, word: 'One', emoji: '1️⃣', objects: '🍎' },
   { num: 2, word: 'Two', emoji: '2️⃣', objects: '🍎🍎' },
@@ -174,3 +175,365 @@ export const numbers = [
   { num: 9, word: 'Nine', emoji: '9️⃣', objects: '🍎🍎🍎🍎🍎🍎🍎🍎🍎' },
   { num: 10, word: 'Ten', emoji: '🔟', objects: '🍎🍎🍎🍎🍎🍎🍎🍎🍎🍎' },
 ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================  Done   ========================
+
+/*
+
+ // 2. Seed Spelling Words
+    const spellingRef = collection(db, "spellingWords");
+    const spellingCheck = await getDocs(query(spellingRef, limit(1)));
+
+    if (spellingCheck.empty) {
+      const spellingWords = [
+        { word: 'CAT', emoji: '🐱', hint: 'Meow' },
+        { word: 'DOG', emoji: '🐕', hint: 'Woof' },
+        { word: 'SUN', emoji: '☀️', hint: 'Bright' }
+      ];
+
+      for (const word of spellingWords) {
+        await addDoc(spellingRef, word);
+      }
+      console.log("✅ Spelling Words seeded!");
+    }
+
+
+*/ 
+
+
+
+
+
+
+/*
+
+// 1. Seed Matching Puzzles
+    const matchingRef = collection(db, "matchingPuzzles");
+    const matchingCheck = await getDocs(query(matchingRef, limit(1)));
+    
+    if (matchingCheck.empty) {
+      const matchingPuzzles = [
+        {
+          items: [
+            { id: '1', emoji: '🍎', name: 'Apple' },
+            { id: '2', emoji: '🍌', name: 'Banana' },
+            { id: '3', emoji: '🍇', name: 'Grapes' },
+            { id: '4', emoji: '🍊', name: 'Orange' }
+          ]
+        }
+      ];
+
+      for (const puzzle of matchingPuzzles) {
+        await addDoc(matchingRef, puzzle);
+      }
+      console.log("✅ Matching Puzzles seeded!");
+    }
+
+*/ 
+
+
+
+
+
+/*
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+
+export const seedMemoryLevels = async () => {
+  try {
+    const memoryRef = collection(db, "memoryLevels");
+    // Check if collection already exists/has data
+    const memoryCheck = await getDocs(query(memoryRef, limit(1)));
+
+    if (memoryCheck.empty) {
+      console.log("🌱 Starting database seed...");
+      const memoryLevels = [
+        { theme: 'Animals', order: 1, emojis: ['🦁', '🐵', '🐱', '🐶'] },
+        { theme: 'Fruits', order: 2, emojis: ['🍎', '🍌', '🍇', '🍓'] },
+        { theme: 'Space', order: 3, emojis: ['🌍', '🪐', '☄️', '🛰️'] }
+      ];
+
+      for (const lv of memoryLevels) {
+        await addDoc(memoryRef, lv);
+      }
+      console.log("✅ Memory Levels saved to Firestore!");
+    } else {
+      console.log("ℹ️ Collection 'memoryLevels' already exists. No data added.");
+    }
+  } catch (error) {
+    console.error("❌ Firestore Seed Error:", error);
+  }
+};
+
+*/
+
+
+
+
+/*
+
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+
+export const seedColorLevels = async () => {
+  try {
+    const colorRef = collection(db, "colorLevels");
+    const colorCheck = await getDocs(query(colorRef, limit(1)));
+
+    if (colorCheck.empty) {
+      console.log("🌱 Seeding Color Levels...");
+      const colorLevels = [
+        { order: 1, colors: ['#FF0000', '#00FF00', '#0000FF'], names: ['Red', 'Green', 'Blue'] },
+        { order: 2, colors: ['#FFFF00', '#FF00FF', '#00FFFF'], names: ['Yellow', 'Pink', 'Cyan'] },
+        { order: 3, colors: ['#FFA500', '#800080', '#008000', '#000000'], names: ['Orange', 'Purple', 'Green', 'Black'] },
+        { order: 4, colors: ['#FFC0CB', '#A52A2A', '#808080', '#FFFFFF'], names: ['Pink', 'Brown', 'Gray', 'White'] },
+        { order: 5, colors: ['#FFD700', '#C0C0C0', '#4B0082', '#808000'], names: ['Gold', 'Silver', 'Indigo', 'Olive'] },
+      ];
+
+      for (const lv of colorLevels) {
+        await addDoc(colorRef, lv);
+      }
+      console.log("✅ Color Levels seeded!");
+    }
+  } catch (error) {
+    console.error("❌ Error seeding color levels:", error);
+  }
+};
+
+*/ 
+
+
+
+
+
+
+/*
+
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+
+// ... previous seed functions ...
+
+export const seedShadowLevels = async () => {
+  try {
+    const shadowRef = collection(db, "shadowLevels");
+    const shadowCheck = await getDocs(query(shadowRef, limit(1)));
+
+    if (shadowCheck.empty) {
+      console.log("🌱 Seeding Shadow Levels...");
+      const shadowLevels = [
+        { item: '🍎', name: 'Apple', order: 1 },
+        { item: '🦁', name: 'Lion', order: 2 },
+        { item: '🐘', name: 'Elephant', order: 3 },
+        { item: '🍇', name: 'Grapes', order: 4 },
+        { item: '🦒', name: 'Giraffe', order: 5 },
+        { item: '🦓', name: 'Zebra', order: 6 },
+        { item: '🍌', name: 'Banana', order: 7 },
+        { item: '🐢', name: 'Turtle', order: 8 },
+        { item: '🦋', name: 'Butterfly', order: 9 },
+        { item: '🐙', name: 'Octopus', order: 10 },
+      ];
+
+      for (const lv of shadowLevels) {
+        await addDoc(shadowRef, lv);
+      }
+      console.log("✅ Shadow Levels seeded!");
+    }
+  } catch (error) {
+    console.error("❌ Error seeding shadow levels:", error);
+  }
+};
+
+*/ 
+
+
+
+
+
+
+
+
+/*
+
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+
+// ... (keep your existing seed functions)
+
+export const seedAnomalyLevels = async () => {
+  try {
+    const anomalyRef = collection(db, "anomalyLevels");
+    const checkSnapshot = await getDocs(query(anomalyRef, limit(1)));
+
+    if (checkSnapshot.empty) {
+      console.log("🌱 Seeding Anomaly Levels...");
+      const levels = [
+        { items: ['🍎', '🍎', '🍌', '🍎'], odd: 2, msg: 'Banana is the odd one!', order: 1 },
+        { items: ['🚗', '🚕', '🚙', '✈️'], odd: 3, msg: 'The airplane flies in the sky!', order: 2 },
+        { items: ['🐘', '🐘', '🐘', '🐭'], odd: 3, msg: 'The mouse is tiny!', order: 3 },
+        { items: ['☁️', '☁️', '☀️', '☁️'], odd: 2, msg: 'The sun is shining bright!', order: 4 },
+        { items: ['🐶', '🐱', '🐶', '🐶'], odd: 1, msg: 'Meow! The cat is different!', order: 5 },
+        { items: ['🟢', '🔴', '🔴', '🔴'], odd: 0, msg: 'Green is the different color!', order: 6 },
+        { items: ['🍕', '🍕', '🍦', '🍕'], odd: 2, msg: 'Ice cream is cold and yummy!', order: 7 },
+        { items: ['👟', '👟', '👟', '🎩'], odd: 3, msg: 'The hat goes on your head!', order: 8 },
+        { items: ['🎸', '🎸', '🥁', '🎸'], odd: 2, msg: 'The drum makes a boom boom sound!', order: 9 },
+        { items: ['🌙', '⭐', '⭐', '⭐'], odd: 0, msg: 'The moon glows at night!', order: 10 },
+      ];
+
+      for (const lv of levels) {
+        await addDoc(anomalyRef, lv);
+      }
+      console.log("✅ Anomaly Levels seeded!");
+    }
+  } catch (error) {
+    console.error("❌ Error seeding anomalies:", error);
+  }
+};
+
+*/ 
+
+
+
+
+
+
+// import { db } from '@/lib/firebase';
+// import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
+
+// // ... (keep your existing seed functions)
+
+// export const seedVectorLevels = async () => {
+//   try {
+//     const vectorRef = collection(db, "vectorLevels");
+//     const checkSnapshot = await getDocs(query(vectorRef, limit(1)));
+
+//     if (checkSnapshot.empty) {
+//       console.log("🌱 Seeding Vector Lab Levels...");
+//       const levels = [
+//         { 
+//           name: 'Triangle', 
+//           order: 1,
+//           dots: [{ x: 100, y: 40 }, { x: 160, y: 160 }, { x: 40, y: 160 }] 
+//         },
+//         { 
+//           name: 'Square', 
+//           order: 2,
+//           dots: [{ x: 45, y: 45 }, { x: 155, y: 45 }, { x: 155, y: 155 }, { x: 45, y: 155 }] 
+//         },
+//         { 
+//           name: 'House', 
+//           order: 3,
+//           dots: [{ x: 45, y: 160 }, { x: 45, y: 85 }, { x: 100, y: 30 }, { x: 155, y: 85 }, { x: 155, y: 160 }] 
+//         },
+//         { 
+//           name: 'Star', 
+//           order: 4,
+//           dots: [{ x: 100, y: 20 }, { x: 115, y: 70 }, { x: 170, y: 75 }, { x: 130, y: 110 }, { x: 145, y: 165 }, { x: 100, y: 135 }, { x: 55, y: 165 }, { x: 70, y: 110 }, { x: 30, y: 75 }, { x: 85, y: 70 }] 
+//         },
+//         { 
+//           name: 'Diamond', 
+//           order: 5,
+//           dots: [{ x: 100, y: 25 }, { x: 175, y: 100 }, { x: 100, y: 175 }, { x: 25, y: 100 }] 
+//         },
+//       ];
+
+//       for (const lv of levels) {
+//         await addDoc(vectorRef, lv);
+//       }
+//       console.log("✅ Vector Lab seeded!");
+//     }
+//   } catch (error) {
+//     console.error("❌ Error seeding vector levels:", error);
+//   }
+// };
+
+
+
+
+
+
+
+// export const seedMoreAnomalies = async () => {
+//   const anomalyRef = collection(db, "anomalyLevels");
+//   const newLevels = [
+//     { items: ['🦁', '🦁', '🦁', '🐯'], odd: 3, msg: 'Tiger detected in Pride Lands', order: 11 },
+//     { items: ['🚗', '🚲', '🚗', '🚗'], odd: 1, msg: 'Bicycle in the fast lane', order: 12 },
+//     // ... add more as needed
+//   ];
+
+//   for (const lv of newLevels) {
+//     // Check if order exists before adding
+//     const q = query(anomalyRef, where("order", "==", lv.order));
+//     const snap = await getDocs(q);
+//     if (snap.empty) {
+//       await addDoc(anomalyRef, lv);
+//     }
+//   }
+// };
+

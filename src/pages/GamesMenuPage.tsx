@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Layers, Palette, Puzzle, Hash, Zap, Brain, Sparkles, Home, ChevronRight } from 'lucide-react';
+import { Layers, Palette, Hash, Zap, Brain, Sparkles, Home, } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { playTap } from '@/lib/sounds';
 

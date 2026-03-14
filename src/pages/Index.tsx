@@ -18,6 +18,8 @@ import { playTap } from "@/lib/sounds";
 import { auth } from "@/lib/firebase";
 import { AuthService } from "@/services/auth.service";
 import { toast } from "sonner";
+// import { appendNewShadowLevels } from "@/lib/db-utils";
+import { useEffect } from "react";
 
 const modules = [
   {

@@ -1,34 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Hash, Home, PenTool, Activity, ChevronRight } from 'lucide-react';
+import { Star, Home, PenTool, Activity, ChevronRight, Loader2 } from 'lucide-react';
 import { speakText } from '@/lib/speech';
 import { playTap, playStar, playCelebration } from '@/lib/sounds';
 import { emojiCannon, starBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const shapes = [
-  { name: 'Triangle', dots: [{ x: 100, y: 40 }, { x: 160, y: 160 }, { x: 40, y: 160 }] },
-  { name: 'Square', dots: [{ x: 45, y: 45 }, { x: 155, y: 45 }, { x: 155, y: 155 }, { x: 45, y: 155 }] },
-  { name: 'House', dots: [{ x: 45, y: 160 }, { x: 45, y: 85 }, { x: 100, y: 30 }, { x: 155, y: 85 }, { x: 155, y: 160 }] },
-  { name: 'Star', dots: [{ x: 100, y: 20 }, { x: 115, y: 70 }, { x: 170, y: 75 }, { x: 130, y: 110 }, { x: 145, y: 165 }, { x: 100, y: 135 }, { x: 55, y: 165 }, { x: 70, y: 110 }, { x: 30, y: 75 }, { x: 85, y: 70 }] },
-  { name: 'Diamond', dots: [{ x: 100, y: 25 }, { x: 175, y: 100 }, { x: 100, y: 175 }, { x: 25, y: 100 }] },
-];
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const DotConnectPage = () => {
-  const [level, setLevel] = useState(0);
+  const [dbLevels, setDbLevels] = useState([]);
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  
   const [connected, setConnected] = useState<number[]>([]);
   const [isWon, setIsWon] = useState(false);
   const navigate = useNavigate();
-  const currentShape = shapes[level % shapes.length];
 
+  // 1. Fetch Vector Schemas
   useEffect(() => {
-    setConnected([0]);
-    setIsWon(false);
-    speakText('Reconstruct the vector for the ' + currentShape.name + '!');
-  }, [level]);
+    const q = query(collection(db, "vectorLevels"), orderBy("order", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDbLevels(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Reset Canvas on Level Change
+  useEffect(() => {
+    if (dbLevels.length > 0 && dbLevels[levelIndex]) {
+      setConnected([0]);
+      setIsWon(false);
+      speakText(`Reconstruct the vector for the ${dbLevels[levelIndex].name}!`);
+    }
+  }, [levelIndex, dbLevels]);
+
+  const currentShape = dbLevels[levelIndex];
 
   const handleDotClick = (index: number) => {
-    if (isWon) return;
+    if (isWon || loading) return;
 
     if (index === connected.length) {
       playTap();
@@ -42,20 +56,27 @@ const DotConnectPage = () => {
         playCelebration();
         emojiCannon();
         setTimeout(() => starBurst(), 300);
-        speakText('Vector complete. ' + currentShape.name + ' data stabilized.');
+        speakText(`Vector complete. ${currentShape.name} data stabilized.`);
       }
     }
   };
 
+  if (loading) return (
+    <div className="h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4 text-pink-500">
+      <Loader2 className="w-12 h-12 animate-spin" />
+      <p className="font-black uppercase tracking-[0.3em] text-[10px]">Loading Vector Data...</p>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
       
-      {/* 1. Background Visuals */}
+      {/* Background Visuals */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[30%] left-[-10%] w-[50%] h-[50%] bg-pink-500/5 blur-[120px] rounded-full" />
       </div>
 
-      {/* 2. Command Header */}
+      {/* Command Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
         <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
           <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -71,14 +92,14 @@ const DotConnectPage = () => {
           </div>
 
           <div className="px-5 py-2 bg-pink-500/10 border border-pink-500/20 rounded-2xl shadow-[0_0_15px_rgba(236,72,153,0.1)]">
-            <span className="text-pink-400 font-black text-xs uppercase italic tracking-widest">{currentShape.name}</span>
+            <span className="text-pink-400 font-black text-xs uppercase italic tracking-widest">{currentShape?.name}</span>
           </div>
         </div>
       </header>
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
         
-        {/* 3. Instruction Module */}
+        {/* Instruction Module */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -93,14 +114,13 @@ const DotConnectPage = () => {
           </div>
         </motion.div>
 
-        {/* 4. Reconstruction Canvas */}
+        {/* Reconstruction Canvas */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full aspect-square bg-white/[0.02] rounded-[3.5rem] border-2 border-white/5 shadow-inner relative p-8 group"
           >
-            {/* Grid Pattern Background */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
 
@@ -136,14 +156,13 @@ const DotConnectPage = () => {
                 />
               )}
 
-              {/* Data Nodes (Dots) */}
-              {currentShape.dots.map((dot, i) => {
+              {/* Data Nodes */}
+              {currentShape?.dots.map((dot, i: number) => {
                 const isConnected = connected.includes(i);
                 const isNext = i === connected.length;
                 
                 return (
                   <g key={i} onClick={() => handleDotClick(i)} className="cursor-pointer group/dot">
-                    {/* Outer Pulse for Next Dot */}
                     {isNext && (
                       <circle cx={dot.x} cy={dot.y} r="22" className="fill-pink-500/20 animate-ping" />
                     )}
@@ -176,7 +195,7 @@ const DotConnectPage = () => {
           </motion.div>
         </div>
 
-        {/* 5. Stabilization Success Modal */}
+        {/* Success Modal */}
         <AnimatePresence>
           {isWon && (
             <motion.div 
@@ -201,10 +220,10 @@ const DotConnectPage = () => {
                 </div>
                 
                 <button
-                  onClick={() => setLevel(level + 1)}
+                  onClick={() => levelIndex < dbLevels.length - 1 ? setLevelIndex(levelIndex + 1) : setLevelIndex(0)}
                   className="w-full py-6 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all border border-white/20 uppercase italic tracking-widest flex items-center justify-center gap-2"
                 >
-                  Next Schema <ChevronRight className="w-6 h-6" />
+                  {levelIndex < dbLevels.length - 1 ? 'Next Schema' : 'Restart Lab'} <ChevronRight className="w-6 h-6" />
                 </button>
               </motion.div>
             </motion.div>

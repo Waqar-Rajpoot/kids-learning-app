@@ -1,36 +1,79 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, Sparkles, LayoutGrid } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; 
+import { Home, Sparkles, LayoutGrid, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LearningCard from '@/components/LearningCard';
 import CategoryTabs from '@/components/CategoryTabs';
-import { animals, birds, fruits } from '@/data/learningData';
 import { playTap } from '@/lib/sounds';
 
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+
 const categories = [
-  { id: 'animals', label: 'Animals', emoji: '🦁' },
-  { id: 'birds', label: 'Birds', emoji: '🦜' },
-  { id: 'fruits', label: 'Fruits', emoji: '🍎' },
+  { id: 'animal', label: 'Animals', emoji: '🦁' }, 
+  { id: 'bird', label: 'Birds', emoji: '🦜' },
+  { id: 'fruit', label: 'Fruits', emoji: '🍎' },
 ];
 
 const AnimalsPage = () => {
-  const [activeCategory, setActiveCategory] = useState('animals');
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const getItems = () => {
-    switch (activeCategory) {
-      case 'animals': return animals;
-      case 'birds': return birds;
-      case 'fruits': return fruits;
-      default: return animals;
-    }
+  const parentPath = location.pathname.split('/')[1] || 'animals';
+
+  const getInitialCategory = () => {
+    if (parentPath === 'birds') return 'bird';
+    if (parentPath === 'fruits') return 'fruit';
+    return 'animal';
+  };
+
+  const [activeCategory, setActiveCategory] = useState(getInitialCategory());
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Real-time Database Listener
+  useEffect(() => {
+    setLoading(true);
+    
+    const q = query(
+      collection(db, "learning_items"), 
+      where("category", "==", activeCategory)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedItems = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setItems(fetchedItems);
+      setLoading(false);
+    }, (error) => {
+      console.error("Firestore Error:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [activeCategory]);
+
+  const handleCategoryChange = (cat: string) => {
+    playTap();
+    setActiveCategory(cat);
+    
+    // Update URL when tab changes to keep parentPath in sync
+    const pathMap: Record<string, string> = {
+      animal: '/animals',
+      bird: '/birds',
+      fruit: '/fruits'
+    };
+    navigate(pathMap[cat], { replace: true });
   };
 
   const getCategoryGradient = () => {
     switch (activeCategory) {
-      case 'animals': return 'from-orange-500 to-amber-400';
-      case 'birds': return 'from-cyan-500 to-blue-400';
-      case 'fruits': return 'from-emerald-500 to-green-400';
+      case 'animal': return 'from-orange-500 to-amber-400';
+      case 'bird': return 'from-cyan-500 to-blue-400';
+      case 'fruit': return 'from-emerald-500 to-green-400';
       default: return 'from-primary to-purple-500';
     }
   };
@@ -38,7 +81,7 @@ const AnimalsPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#0f172a] text-white font-display relative overflow-hidden">
       
-      {/* 1. Background Aura (Fixed) */}
+      {/* 1. Background Aura */}
       <div className="fixed inset-0 pointer-events-none">
         <AnimatePresence mode="wait">
           <motion.div
@@ -52,9 +95,8 @@ const AnimalsPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* 2. STICKY TOP SECTION (Header + Tabs) */}
+      {/* 2. STICKY TOP SECTION */}
       <div className="sticky top-0 z-50 flex flex-col">
-        {/* Header */}
         <header className="bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 px-4 py-4">
           <div className="flex items-center justify-between w-full max-w-lg mx-auto">
             <button
@@ -71,26 +113,21 @@ const AnimalsPage = () => {
               <div className="flex items-center justify-center gap-1.5 mt-0.5">
                 <Sparkles className="w-3 h-3 text-primary animate-pulse" />
                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
-                  Explore {activeCategory}
+                  Explore {activeCategory}s
                 </p>
                 <Sparkles className="w-3 h-3 text-primary animate-pulse" />
               </div>
             </div>
-            
             <div className="w-12" />
           </div>
         </header>
 
-        {/* Category Tabs (Integrated into sticky stack) */}
         <div className="bg-[#0f172a]/40 backdrop-blur-lg px-4 py-3 border-b border-white/5">
           <div className="max-w-lg mx-auto bg-black/40 p-1 rounded-[2rem] border border-white/10 shadow-2xl">
             <CategoryTabs
               categories={categories}
               activeCategory={activeCategory}
-              onChange={(cat) => {
-                playTap();
-                setActiveCategory(cat);
-              }}
+              onChange={handleCategoryChange}
             />
           </div>
         </div>
@@ -100,7 +137,7 @@ const AnimalsPage = () => {
       <main className="flex-1 px-4 py-6 pb-24 relative z-10 scrollbar-hide">
         <div className="max-w-lg mx-auto">
           
-          {/* Stats Badge - Now clearly separated in the main flow */}
+          {/* Stats Badge */}
           <div className="flex justify-center mb-10">
             <AnimatePresence mode="wait">
               <motion.div 
@@ -111,39 +148,46 @@ const AnimalsPage = () => {
                 className={`px-6 py-2.5 bg-gradient-to-r ${getCategoryGradient()} rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/20`}
               >
                 <span className="text-white text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
-                  {getItems().length} {activeCategory} unlocked 🎉
+                  {loading ? "Counting..." : `${items.length} ${activeCategory}s unlocked 🎉`}
                 </span>
               </motion.div>
             </AnimatePresence>
           </div>
 
           {/* Grid of Items */}
-          <div className="grid grid-cols-2 gap-5">
-            <AnimatePresence mode="popLayout">
-              {getItems().map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-                  transition={{ delay: index * 0.04, type: "spring", stiffness: 200, damping: 20 }}
-                >
-                  <LearningCard
-                    id={item.id}
-                    name={item.name}
-                    emoji={item.emoji}
-                    color={item.color}
-                    category={activeCategory}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-2 gap-5 min-h-[300px]">
+            {loading ? (
+              <div className="col-span-2 flex flex-col items-center justify-center py-20 text-white/40">
+                <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                <p className="text-xs font-bold uppercase tracking-widest">Finding Friends...</p>
+              </div>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {items.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                    transition={{ delay: index * 0.04, type: "spring", stiffness: 200, damping: 20 }}
+                  >
+                    <LearningCard
+                      id={item.id}
+                      name={item.name}
+                      emoji={item.emoji}
+                      color={item.color}
+                      category={activeCategory}
+                      parentPath={parentPath} // Re-added parentPath prop
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
           </div>
         </div>
       </main>
 
-      {/* Bottom Safe Area */}
       <div className="h-10 shrink-0 pointer-events-none" />
     </div>
   );

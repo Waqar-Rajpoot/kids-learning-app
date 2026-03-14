@@ -1,48 +1,57 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Zap, Home, ShieldAlert, Fingerprint, Sparkles } from 'lucide-react';
+import { Trophy, Home, ShieldAlert, Fingerprint, Sparkles, Loader2 } from 'lucide-react';
 import { speakText } from '@/lib/speech';
 import { playTap, playWrong, playCelebration } from '@/lib/sounds';
 import { starBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const levels = [
-  { items: ['🍎', '🍎', '🍌', '🍎'], odd: 2, msg: 'Banana is the odd one!' },
-  { items: ['🚗', '🚕', '🚙', '✈️'], odd: 3, msg: 'The airplane flies in the sky!' },
-  { items: ['🐘', '🐘', '🐘', '🐭'], odd: 3, msg: 'The mouse is tiny!' },
-  { items: ['☁️', '☁️', '☀️', '☁️'], odd: 2, msg: 'The sun is shining bright!' },
-  { items: ['🐶', '🐱', '🐶', '🐶'], odd: 1, msg: 'Meow! The cat is different!' },
-  { items: ['🟢', '🔴', '🔴', '🔴'], odd: 0, msg: 'Green is the different color!' },
-  { items: ['🍕', '🍕', '🍦', '🍕'], odd: 2, msg: 'Ice cream is cold and yummy!' },
-  { items: ['👟', '👟', '👟', '🎩'], odd: 3, msg: 'The hat goes on your head!' },
-  { items: ['🎸', '🎸', '🥁', '🎸'], odd: 2, msg: 'The drum makes a boom boom sound!' },
-  { items: ['🌙', '⭐', '⭐', '⭐'], odd: 0, msg: 'The moon glows at night!' },
-];
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const OddOneOutPage = () => {
-  const [level, setLevel] = useState(0);
+  const [dbLevels, setDbLevels] = useState([]);
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  
   const [selected, setSelected] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const [isWon, setIsWon] = useState(false);
   const navigate = useNavigate();
 
+  // 1. Fetch Anomaly Data
   useEffect(() => {
-    setSelected(null);
-    setWrongPick(null);
-    setIsWon(false);
-    speakText('Locate the anomaly!');
-  }, [level]);
+    const q = query(collection(db, "anomalyLevels"), orderBy("order", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDbLevels(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Level Reset Logic
+  useEffect(() => {
+    if (dbLevels.length > 0) {
+      setSelected(null);
+      setWrongPick(null);
+      setIsWon(false);
+      speakText('Locate the anomaly!');
+    }
+  }, [levelIndex, dbLevels]);
 
   const handleItemClick = (index: number) => {
-    if (isWon) return;
+    if (isWon || loading) return;
+    const currentLevel = dbLevels[levelIndex];
     playTap();
 
-    if (index === levels[level].odd) {
+    if (index === currentLevel.odd) {
       setSelected(index);
       setIsWon(true);
       playCelebration();
       starBurst();
-      speakText('Anomaly neutralized! ' + levels[level].msg);
+      speakText(`Anomaly neutralized! ${currentLevel.msg}`);
     } else {
       playWrong();
       setWrongPick(index);
@@ -51,16 +60,25 @@ const OddOneOutPage = () => {
     }
   };
 
+  if (loading) return (
+    <div className="h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4 text-emerald-500">
+      <Loader2 className="w-12 h-12 animate-spin" />
+      <p className="font-black uppercase tracking-[0.3em] text-[10px]">Synchronizing Radar...</p>
+    </div>
+  );
+
+  const currentLevel = dbLevels[levelIndex];
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
       
-      {/* 1. Cyber-Glow Background */}
+      {/* Cyber-Glow Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[10%] left-[-5%] w-[60%] h-[60%] bg-emerald-500/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-green-500/5 blur-[100px] rounded-full" />
       </div>
 
-      {/* 2. Command Header */}
+      {/* Command Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
         <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
           <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -76,14 +94,14 @@ const OddOneOutPage = () => {
           </div>
 
           <div className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl">
-            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{level + 1}</span>
+            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{levelIndex + 1}</span>
           </div>
         </div>
       </header>
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
         
-        {/* 3. Mission Status Module */}
+        {/* Mission Status Module */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -98,11 +116,11 @@ const OddOneOutPage = () => {
           </div>
         </motion.div>
 
-        {/* 4. Scanner Grid */}
+        {/* Scanner Grid */}
         <div className="flex-1 flex items-center justify-center">
           <div className="bg-white/[0.02] p-8 rounded-[3.5rem] border-2 border-white/5 shadow-inner w-full">
             <div className="grid grid-cols-2 gap-5">
-              {levels[level].items.map((item, idx) => (
+              {currentLevel?.items.map((item: string, idx: number) => (
                 <motion.button
                   key={idx}
                   initial={{ scale: 0.9, opacity: 0 }}
@@ -120,7 +138,6 @@ const OddOneOutPage = () => {
                 >
                   <span className="z-10 drop-shadow-2xl">{item}</span>
                   
-                  {/* Digital Overlay */}
                   <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-2 left-4 text-[8px] font-black text-white/10 uppercase tracking-tighter">
                       ID-{1024 + idx}
@@ -140,7 +157,7 @@ const OddOneOutPage = () => {
           </div>
         </div>
 
-        {/* 5. Victory Interface */}
+        {/* Victory Interface */}
         <AnimatePresence>
           {isWon && (
             <motion.div 
@@ -160,15 +177,15 @@ const OddOneOutPage = () => {
                 <div>
                   <h3 className="text-4xl font-black text-white italic tracking-tighter mb-2 uppercase leading-none">Target Locked</h3>
                   <p className="text-emerald-400/80 font-bold uppercase tracking-widest text-[10px] bg-emerald-500/10 py-2 rounded-full px-4 inline-block">
-                    {levels[level].msg}
+                    {currentLevel.msg}
                   </p>
                 </div>
                 
                 <button
-                  onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
+                  onClick={() => levelIndex < dbLevels.length - 1 ? setLevelIndex(levelIndex + 1) : setLevelIndex(0)}
                   className="w-full py-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all border border-white/20 uppercase italic tracking-widest"
                 >
-                  {level < levels.length - 1 ? 'Next Sector' : 'Restart Hunt'}
+                  {levelIndex < dbLevels.length - 1 ? 'Next Sector' : 'Restart Hunt'}
                 </button>
               </motion.div>
             </motion.div>

@@ -1,34 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Trophy, Palette, Home, Sparkles, Zap } from 'lucide-react';
+import { Check, Trophy, Palette, Home, Sparkles, Zap, Loader2 } from 'lucide-react';
 import { speakText } from '@/lib/speech';
 import { playTap, playCorrect, playWrong, playCelebration } from '@/lib/sounds';
 import { rainbowBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const levels = [
-  { colors: ['#FF0000', '#00FF00', '#0000FF'], names: ['Red', 'Green', 'Blue'] },
-  { colors: ['#FFFF00', '#FF00FF', '#00FFFF'], names: ['Yellow', 'Pink', 'Cyan'] },
-  { colors: ['#FFA500', '#800080', '#008000', '#000000'], names: ['Orange', 'Purple', 'Green', 'Black'] },
-  { colors: ['#FFC0CB', '#A52A2A', '#808080', '#FFFFFF'], names: ['Pink', 'Brown', 'Gray', 'White'] },
-  { colors: ['#FFD700', '#C0C0C0', '#4B0082', '#808000'], names: ['Gold', 'Silver', 'Indigo', 'Olive'] },
-];
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const ColorMatchPage = () => {
-  const [level, setLevel] = useState(0);
+  const [dbLevels, setDbLevels] = useState([]);
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [matches, setMatches] = useState<Record<string, string>>({});
   const [shuffledNames, setShuffledNames] = useState<string[]>([]);
   const [isWon, setIsWon] = useState(false);
 
+  // 1. Fetch Color Levels from Firestore
   useEffect(() => {
-    setShuffledNames([...levels[level].names].sort(() => Math.random() - 0.5));
-    setMatches({});
-    setSelectedColor(null);
-    setIsWon(false);
-    speakText('Match each color to its name!');
-  }, [level]);
+    const q = query(collection(db, "colorLevels"), orderBy("order", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const levels = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDbLevels(levels);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Setup Level Logic
+  useEffect(() => {
+    if (dbLevels.length > 0 && dbLevels[levelIndex]) {
+      const currentLevel = dbLevels[levelIndex];
+      setShuffledNames([...currentLevel.names].sort(() => Math.random() - 0.5));
+      setMatches({});
+      setSelectedColor(null);
+      setIsWon(false);
+      speakText('Match each color to its name!');
+    }
+  }, [levelIndex, dbLevels]);
 
   const handleColorClick = (color: string) => {
     if (matches[color]) return;
@@ -43,7 +57,7 @@ const ColorMatchPage = () => {
     }
     playTap();
 
-    const currentLevel = levels[level];
+    const currentLevel = dbLevels[levelIndex];
     const colorIndex = currentLevel.colors.indexOf(selectedColor);
     const correctName = currentLevel.names[colorIndex];
 
@@ -65,15 +79,20 @@ const ColorMatchPage = () => {
     }
   };
 
+  if (loading) return (
+    <div className="h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4">
+      <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+      <p className="text-white/40 font-black uppercase tracking-widest text-xs">Calibrating Spectrum...</p>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
       
-      {/* Dynamic Background Glow */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-orange-500/5 blur-[120px] rounded-full" />
       </div>
 
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
         <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
           <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -89,14 +108,13 @@ const ColorMatchPage = () => {
           </div>
 
           <div className={`px-5 py-2 bg-white/5 border border-white/10 rounded-2xl`}>
-            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{level + 1}</span>
+            <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{levelIndex + 1}</span>
           </div>
         </div>
       </header>
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
         
-        {/* Instruction Banner */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -111,13 +129,10 @@ const ColorMatchPage = () => {
           </div>
         </motion.div>
 
-        {/* Interaction Grid */}
         <div className="flex-1 flex gap-6 py-4">
-          
-          {/* Colors Column */}
           <div className="flex flex-col gap-4 flex-1">
             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] text-center">Data Input</p>
-            {levels[level].colors.map((color, idx) => (
+            {dbLevels[levelIndex]?.colors.map((color: string, idx: number) => (
               <motion.button
                 key={color}
                 initial={{ x: -20, opacity: 0 }}
@@ -149,7 +164,6 @@ const ColorMatchPage = () => {
             ))}
           </div>
 
-          {/* Names Column */}
           <div className="flex flex-col gap-4 flex-1">
             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] text-center">ID Labels</p>
             {shuffledNames.map((name, idx) => {
@@ -177,7 +191,6 @@ const ColorMatchPage = () => {
           </div>
         </div>
 
-        {/* Victory Modal */}
         <AnimatePresence>
           {isWon && (
             <motion.div 
@@ -200,10 +213,10 @@ const ColorMatchPage = () => {
                 </div>
                 
                 <button
-                  onClick={() => level < levels.length - 1 ? setLevel(level + 1) : setLevel(0)}
+                  onClick={() => levelIndex < dbLevels.length - 1 ? setLevelIndex(levelIndex + 1) : setLevelIndex(0)}
                   className="w-full py-6 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all border border-white/20 uppercase italic tracking-widest"
                 >
-                  {level < levels.length - 1 ? 'Next Sector' : 'Restart Lab'}
+                  {levelIndex < dbLevels.length - 1 ? 'Next Sector' : 'Restart Lab'}
                 </button>
               </motion.div>
             </motion.div>

@@ -1,8 +1,3 @@
-/**
- * Sound Effects for Kids Learning App
- * Uses Web Audio API for instant, lightweight sounds
- */
-
 let audioContext: AudioContext | null = null;
 
 const getAudioContext = (): AudioContext => {

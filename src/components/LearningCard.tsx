@@ -10,10 +10,11 @@ interface LearningCardProps {
   name: string;
   emoji: string;
   color: string;
-  category: string;
+  category: string;    // e.g., "animal"
+  parentPath: string;  // e.g., "animals", "birds", "fruits"
 }
 
-const LearningCard = ({ id, name, emoji, color, category }: LearningCardProps) => {
+const LearningCard = ({ id, name, emoji, color, category, parentPath }: LearningCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const navigate = useNavigate();
 
@@ -21,13 +22,14 @@ const LearningCard = ({ id, name, emoji, color, category }: LearningCardProps) =
     playTap();
     setIsPlaying(true);
     
-    // Speak the name clearly
+    // 1. Speak the name clearly
     speakText(name, () => setIsPlaying(false));
     
-    // Short delay for a smoother "Pop" transition
+    // 2. Short delay for a smoother "Pop" transition to the details page
     setTimeout(() => {
-        navigate(`/${category}/${category}/${id}`);
-    }, 200);
+        // Matches the App.tsx route: /:parentPath/:category/:id
+        navigate(`/${parentPath}/${category}/${id}`);
+    }, 400); // Slightly longer delay so the child hears the word before the screen changes
   };
 
   return (
@@ -65,11 +67,12 @@ const LearningCard = ({ id, name, emoji, color, category }: LearningCardProps) =
             <h3 className="font-black text-white text-base tracking-tighter text-center uppercase italic">
               {name}
             </h3>
+            {/* Dynamic color underline */}
             <div className="h-1 w-8 mx-auto rounded-full opacity-40" style={{ backgroundColor: color }} />
         </div>
       </div>
 
-      {/* 3. Speaking / Active Indicator */}
+      {/* 3. Speaking / Active Indicator Overlay */}
       <AnimatePresence>
           {isPlaying && (
             <motion.div 

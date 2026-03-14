@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Mail, Lock, LogIn, Sparkles, Rocket, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, Rocket, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -18,6 +18,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AuthService } from "@/services/auth.service";
+
+// Firebase Imports for Database Role Check
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -37,12 +41,31 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await AuthService.login(values.email, values.password);
+      // 1. Authenticate via Service (Returns User object)
+      const user = await AuthService.login(values.email, values.password);
+
+      // 2. Fetch the user's document from Firestore to check role
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
       toast.success("Welcome back, Explorer!");
-      navigate("/");
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        
+        // 3. Role-Based Redirection
+        if (userData.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } else {
+        // Fallback: If document is missing, treat as regular user
+        navigate("/");
+      }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Invalid email or password.");
+      toast.error(error.message || "Invalid email or password.");
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +82,6 @@ export function LoginForm() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        // Changed max-w-md to match your Register Page's structural "weight"
         className="w-full max-w-lg relative z-10" 
       >
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-8 sm:p-12 shadow-2xl">
