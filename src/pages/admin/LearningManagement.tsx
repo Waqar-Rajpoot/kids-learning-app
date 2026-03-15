@@ -108,126 +108,125 @@ export const LearningManagement = () => {
 
       <div className="max-w-6xl mx-auto p-4 md:p-8 relative z-10 space-y-8">
         {/* Responsive Header: Stacks on mobile, Rows on Desktop */}
-    <header className="flex flex-col lg:items-center justify-between gap-8 md:gap-10 lg:gap-6">
-  {/* Left Section: Branding */}
-  <div className="space-y-2 text-center lg:text-left">
-    <div className="flex items-center justify-center lg:justify-start gap-4">
-      <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl shadow-inner">
-        <BookOpen className="text-blue-400 w-6 h-6 md:w-7 md:h-7" />
-      </div>
-      <h1 className="text-2xl md:text-4xl text-white/80 font-black uppercase italic tracking-tighter leading-none">
-        Curriculum Catalyst
-      </h1>
-    </div>
-    <p className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold italic px-1">
-      Unified Learning Database
-    </p>
-  </div>
-
-  {/* Right Section: Controls Stacking */}
-  <div className="flex flex-col items-center lg:flex-row gap-5 w-full lg:w-auto">
-    
-    {/* Category Pills: Full width on mobile, auto on desktop */}
-    <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-xl">
-      {['all', 'animal', 'bird', 'fruit'].map((cat) => (
-        <button 
-          key={cat}
-          onClick={() => setFilter(cat)}
-          className={`flex-2 lg:flex-none px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-            filter === cat 
-            ? 'bg-blue-500 text-black shadow-[0_0_15px_rgba(59,130,246,0.4)]' 
-            : 'text-white/40 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-
-    {/* Action Button: Full width on mobile */}
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <button 
-          onClick={resetForm} 
-          className="w-full lg:w-auto bg-blue-500 hover:bg-blue-400 text-black p-4 lg:px-7 lg:py-3.5 rounded-2xl flex flex-1 items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-[0_0_25px_rgba(59,130,246,0.2)] border-t border-white/20"
-        >
-          <Plus size={20} strokeWidth={3} />
-          <span className="font-black uppercase text-xs md:text-sm italic tracking-tighter">Add New Item</span>
-        </button>
-      </DialogTrigger>
-      
-      {/* Dialog Content */}
-      <DialogContent className="bg-[#020617] border border-white/10 text-white rounded-[2.5rem] w-[92%] sm:max-w-[450px] max-h-[90vh] overflow-hidden flex flex-col p-0 outline-none shadow-2xl">
-        <DialogHeader className="p-8 pb-4">
-          <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-            <Sparkles className="text-blue-400 w-6 h-6" />
-            {editingItem ? 'Refine Item' : 'Create Item'}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="flex-1 overflow-y-auto p-8 pt-2 custom-scrollbar">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Alligator" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-bold outline-none focus:border-blue-500/50 transition-colors" />
+        <header className="flex flex-col lg:items-center justify-between gap-8 md:gap-10 lg:gap-6">
+          {/* Left Section: Branding */}
+          <div className="space-y-2 text-center lg:text-left">
+            <div className="flex items-center justify-center lg:justify-start gap-4">
+              <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl shadow-inner">
+                <BookOpen className="text-blue-400 w-6 h-6 md:w-7 md:h-7" />
               </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Emoji</label>
-                <input value={emoji} onChange={e => setEmoji(e.target.value)} placeholder="🐊" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-3xl text-center outline-none focus:border-blue-500/50 transition-colors" />
-              </div>
+              <h1 className="text-2xl md:text-4xl text-white/80 font-black uppercase italic tracking-tighter leading-none">
+                Curriculum Catalyst
+              </h1>
+            </div>
+            <p className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold italic px-1">
+              Unified Learning Database
+            </p>
+          </div>
+
+          {/* Right Section: Controls Stacking */}
+          <div className="flex flex-col items-center lg:flex-row gap-5 w-full lg:w-auto">
+
+            {/* Category Pills: Full width on mobile, auto on desktop */}
+            <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-xl">
+              {['all', 'animal', 'bird', 'fruit'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilter(cat)}
+                  className={`flex-2 lg:flex-none px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filter === cat
+                      ? 'bg-blue-500 text-black shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+                      : 'text-white/40 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Category</label>
-                <select value={category} onChange={e => setCategory(e.target.value as 'animal' | 'bird' | 'fruit')} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[10px] font-black uppercase outline-none focus:border-blue-500/50 appearance-none cursor-pointer text-white [&>option]:bg-[#020617] [&>option]:text-white">
-                  <option value="animal">Animal</option>
-                  <option value="bird">Bird</option>
-                  <option value="fruit">Fruit</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Color Style</label>
-                <input value={color} onChange={e => setColor(e.target.value)} placeholder="bg-green-50" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[10px] font-mono outline-none focus:border-blue-500/50" />
-              </div>
-            </div>
+            {/* Action Button: Full width on mobile */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                  onClick={resetForm}
+                  className="w-full lg:w-auto bg-blue-500 hover:bg-blue-400 text-black p-4 lg:px-7 lg:py-3.5 rounded-2xl flex flex-1 items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-[0_0_25px_rgba(59,130,246,0.2)] border-t border-white/20"
+                >
+                  <Plus size={20} strokeWidth={3} />
+                  <span className="font-black uppercase text-xs md:text-sm italic tracking-tighter">Add New Item</span>
+                </button>
+              </DialogTrigger>
 
-            <div className="space-y-2">
-              <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1 italic">Dietary Source</label>
-              <div className="relative">
-                <Utensils className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-4 h-4" />
-                <input value={food} onChange={e => setFood(e.target.value)} placeholder="Fish & Meat" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 pl-12 text-xs font-bold outline-none focus:border-blue-500/50" />
-              </div>
-            </div>
+              {/* Dialog Content */}
+              <DialogContent className="bg-[#020617] border border-white/10 text-white rounded-[2.5rem] w-[92%] sm:max-w-[450px] max-h-[90vh] overflow-hidden flex flex-col p-0 outline-none shadow-2xl">
+                <DialogHeader className="p-8 pb-4">
+                  <DialogTitle className="text-2xl text-white/80 font-black uppercase italic tracking-tighter flex items-center gap-3">
+                    <Sparkles className="text-blue-400 w-6 h-6" />
+                    {editingItem ? 'Refine Item' : 'Create Item'}
+                  </DialogTitle>
+                </DialogHeader>
 
-            <div className="space-y-2">
-              <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1 italic">Knowledge Fragment</label>
-              <div className="relative">
-                <Info className="absolute left-4 top-4 text-white/20 w-4 h-4" />
-                <textarea value={fact} onChange={e => setFact(e.target.value)} placeholder="Enter a unique fact..." rows={3} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 pl-12 text-xs font-bold outline-none focus:border-blue-500/50 resize-none" />
-              </div>
-            </div>
+                <div className="flex-1 overflow-y-auto p-8 pt-2 custom-scrollbar">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Name</label>
+                        <input value={name} onChange={e => setName(e.target.value)} placeholder="Alligator" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-bold outline-none focus:border-blue-500/50 transition-colors" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Emoji</label>
+                        <input value={emoji} onChange={e => setEmoji(e.target.value)} placeholder="🐊" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-3xl text-center outline-none focus:border-blue-500/50 transition-colors" />
+                      </div>
+                    </div>
 
-            <button type="submit" className="w-full bg-blue-500 hover:bg-blue-400 text-black py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(59,130,246,0.3)]">
-              <Save size={16} strokeWidth={3} /> Synchronize Data
-            </button>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
-  </div>
-</header>        
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Category</label>
+                        <select value={category} onChange={e => setCategory(e.target.value as 'animal' | 'bird' | 'fruit')} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[10px] font-black uppercase outline-none focus:border-blue-500/50 appearance-none cursor-pointer text-white [&>option]:bg-[#020617] [&>option]:text-white">
+                          <option value="animal">Animal</option>
+                          <option value="bird">Bird</option>
+                          <option value="fruit">Fruit</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1">Color Style</label>
+                        <input value={color} onChange={e => setColor(e.target.value)} placeholder="bg-green-50" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[10px] font-mono outline-none focus:border-blue-500/50" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1 italic">Dietary Source</label>
+                      <div className="relative">
+                        <Utensils className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-4 h-4" />
+                        <input value={food} onChange={e => setFood(e.target.value)} placeholder="Fish & Meat" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 pl-12 text-xs font-bold outline-none focus:border-blue-500/50" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white/30 tracking-widest px-1 italic">Knowledge Fragment</label>
+                      <div className="relative">
+                        <Info className="absolute left-4 top-4 text-white/20 w-4 h-4" />
+                        <textarea value={fact} onChange={e => setFact(e.target.value)} placeholder="Enter a unique fact..." rows={3} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 pl-12 text-xs font-bold outline-none focus:border-blue-500/50 resize-none" />
+                      </div>
+                    </div>
+
+                    <button type="submit" className="w-full bg-blue-500 hover:bg-blue-400 text-black py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(59,130,246,0.3)]">
+                      <Save size={16} strokeWidth={3} /> Synchronize Data
+                    </button>
+                  </form>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </header>
 
         {/* Updated Grid System: 1 column on mobile, 2 on tablet, 3 on large screens */}
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-5">
           <AnimatePresence mode='popLayout'>
             {filteredItems.map((item, idx) => (
-              <motion.div 
-                key={item.id} 
-                layout 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.02 }}
               >
                 <Card className="bg-white/5 border-white/10 rounded-[2.5rem] overflow-hidden hover:border-blue-500/30 transition-all backdrop-blur-sm group h-full flex flex-col">
@@ -237,10 +236,10 @@ export const LearningManagement = () => {
                         {item.emoji}
                       </div>
                       <div className="space-y-0.5">
-                         <span className={`text-[8px] font-black uppercase px-2.5 py-1 rounded-full border ${item.category === 'animal' ? 'border-orange-500/30 text-orange-400 bg-orange-500/5' : item.category === 'bird' ? 'border-blue-500/30 text-blue-400 bg-blue-500/5' : 'border-green-500/30 text-green-400 bg-green-500/5'}`}>
-                           {item.category}
-                         </span>
-                         <h3 className="text-base font-black uppercase italic tracking-tighter text-white/90">{item.name}</h3>
+                        <span className={`text-[8px] font-black uppercase px-2.5 py-1 rounded-full border ${item.category === 'animal' ? 'border-orange-500/30 text-orange-400 bg-orange-500/5' : item.category === 'bird' ? 'border-blue-500/30 text-blue-400 bg-blue-500/5' : 'border-green-500/30 text-green-400 bg-green-500/5'}`}>
+                          {item.category}
+                        </span>
+                        <h3 className="text-base font-black uppercase italic tracking-tighter text-white/90">{item.name}</h3>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
@@ -252,11 +251,11 @@ export const LearningManagement = () => {
                   </CardHeader>
                   <CardContent className="p-6 pt-2 flex-1 flex flex-col justify-between gap-5">
                     <div className="space-y-4">
-                       <div className="flex items-start gap-3 bg-[#020617]/50 p-3 rounded-2xl border border-white/5">
-                          <Utensils size={14} className="text-blue-400 shrink-0 mt-0.5" />
-                          <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">{item.food}</p>
-                       </div>
-                       <p className="text-[11px] text-white/40 leading-relaxed font-medium italic border-l-2 border-white/10 pl-4">"{item.fact}"</p>
+                      <div className="flex items-start gap-3 bg-[#020617]/50 p-3 rounded-2xl border border-white/5">
+                        <Utensils size={14} className="text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">{item.food}</p>
+                      </div>
+                      <p className="text-[11px] text-white/40 leading-relaxed font-medium italic border-l-2 border-white/10 pl-4">"{item.fact}"</p>
                     </div>
                     <div className={`h-2 w-full rounded-full opacity-20 ${item.color}`} />
                   </CardContent>
