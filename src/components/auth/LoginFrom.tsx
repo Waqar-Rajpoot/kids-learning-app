@@ -38,39 +38,35 @@ export function LoginForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      // 1. Authenticate via Service (Returns User object)
-      const user = await AuthService.login(values.email, values.password);
+ // Inside your onSubmit function in LoginForm.tsx
+async function onSubmit(values: z.infer<typeof formSchema>) {
+  setIsLoading(true);
+  try {
+    const user = await AuthService.login(values.email, values.password);
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    toast.success("Welcome back, Explorer!");
 
-      // 2. Fetch the user's document from Firestore to check role
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
       
-      toast.success("Welcome back, Explorer!");
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        // 3. Role-Based Redirection
-        if (userData.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+      // STRICT REDIRECTION
+      if (userData.role === "admin") {
+        navigate("/admin", { replace: true });
       } else {
-        // Fallback: If document is missing, treat as regular user
-        navigate("/");
+        navigate("/", { replace: true });
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Invalid email or password.");
-    } finally {
-      setIsLoading(false);
+    } else {
+      navigate("/", { replace: true });
     }
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error(error.message || "Invalid email or password.");
+  } finally {
+    setIsLoading(false);
   }
-
+}
   return (
     <div className="min-h-screen bg-[#0f172a] text-white flex items-center justify-center p-4 relative overflow-hidden font-display">
       {/* Dynamic Background Blobs */}

@@ -60,11 +60,12 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<string | null>(null); // Track user role
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
       if (currentUser) {
         setUser(currentUser);
         try {
@@ -129,15 +130,24 @@ const AppContent = () => {
             ) : (
               <div className="flex-1 flex flex-col relative overflow-hidden">
                 <Routes>
-                  {/* --- PUBLIC / AUTH ROUTES --- */}
+                  {/* PUBLIC ROUTES */}
+                  <Route 
+                    path="/login" 
+                    element={
+                      !user ? <LoginForm /> : <Navigate to={isAdmin ? "/admin" : "/"} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/register" 
+                    element={!user ? <RegisterForm /> : <Navigate to="/" replace />} 
+                  />
+
                   {!user ? (
-                    <>
-                      <Route path="/login" element={<LoginForm />} />
-                      <Route path="/register" element={<RegisterForm />} />
-                      <Route path="*" element={<Navigate to="/login" replace />} />
-                    </>
+                    <Route path="*" element={<Navigate to="/login" replace />} />
                   ) : isAdmin ? (
-                    /* --- ADMIN ONLY ROUTES --- */
+                    /* -----------------------------------------------------------
+                       ADMIN-ONLY ROUTE TREE
+                       ----------------------------------------------------------- */
                     <>
                       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                       <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
@@ -152,11 +162,15 @@ const AppContent = () => {
                       <Route path="/admin/spellings" element={<AdminRoute><SpellingManagement /></AdminRoute>} />
                       <Route path="/admin/poems" element={<AdminRoute><PoemManagement /></AdminRoute>} />
                       <Route path="/admin/learning" element={<AdminRoute><LearningManagement /></AdminRoute>} />
+                      
+                      {/* CATCH-ALL FOR ADMIN: If they hit root / or a user route, force them back to /admin */}
                       <Route path="/" element={<Navigate to="/admin" replace />} />
                       <Route path="*" element={<Navigate to="/admin" replace />} />
                     </>
                   ) : (
-                    /* --- USER ONLY ROUTES --- */
+                    /* -----------------------------------------------------------
+                       USER-ONLY ROUTE TREE
+                       ----------------------------------------------------------- */
                     <>
                       <Route path="/" element={<Index />} />
                       <Route path="/animals" element={<AnimalsPage />} />
@@ -175,8 +189,9 @@ const AppContent = () => {
                       <Route path="/numbers" element={<NumbersPage />} />
                       <Route path="/drawing" element={<DrawingPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
+                      
+                      {/* CATCH-ALL FOR USER: Block access to admin routes */}
                       <Route path="/admin/*" element={<Navigate to="/" replace />} />
-
                       <Route path="*" element={<NotFound />} />
                     </>
                   )}
