@@ -6,9 +6,10 @@ import { playTap, playCorrect, playWrong, playCelebration } from '@/lib/sounds';
 import { rainbowBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService';
 
 const ColorMatchPage = () => {
   const [dbLevels, setDbLevels] = useState([]);
@@ -21,7 +22,7 @@ const ColorMatchPage = () => {
   const [shuffledNames, setShuffledNames] = useState<string[]>([]);
   const [isWon, setIsWon] = useState(false);
 
-  // 1. Fetch Color Levels from Firestore
+  // 1. Fetch Color Levels
   useEffect(() => {
     const q = query(collection(db, "colorLevels"), orderBy("order", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -50,7 +51,7 @@ const ColorMatchPage = () => {
     setSelectedColor(color);
   };
 
-  const handleNameClick = (name: string) => {
+  const handleNameClick = async (name: string) => {
     if (!selectedColor) {
       speakText('Pick a color first!');
       return;
@@ -69,12 +70,22 @@ const ColorMatchPage = () => {
       
       if (Object.keys(newMatches).length === currentLevel.colors.length) {
         setIsWon(true);
+        
+        // Update Stats: Award 25 points on completion
+        await StatsService.updateUserStats(
+          25, 
+          `color_${currentLevel.id}`, 
+          true
+        );
+
         playCelebration();
         rainbowBurst();
         speakText('Mission Complete! Color spectrum stabilized.');
       }
     } else {
       playWrong();
+      // Track a mismatch as a 'wrongPick'
+      StatsService.updateUserStats(0, null, false, "wrongPicks");
       speakText('Identity mismatch! Try again.');
     }
   };
@@ -88,7 +99,6 @@ const ColorMatchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
-      
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-orange-500/5 blur-[120px] rounded-full" />
       </div>
@@ -107,14 +117,13 @@ const ColorMatchPage = () => {
             </div>
           </div>
 
-          <div className={`px-5 py-2 bg-white/5 border border-white/10 rounded-2xl`}>
+          <div className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl">
             <span className="text-white/40 font-black text-xs uppercase italic tracking-widest">Lv.{levelIndex + 1}</span>
           </div>
         </div>
       </header>
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
-        
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

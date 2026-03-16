@@ -6,9 +6,10 @@ import { playTap, playMatch, playWrong, playCelebration } from '@/lib/sounds';
 import { levelComplete } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService';
 
 const levelColors = [
   'from-amber-400 to-orange-600',
@@ -41,7 +42,7 @@ const MemoryMatchPage = () => {
 
   const currentLevelData = dbLevels[levelIndex];
 
-  // 2. Initialize Game Logic using Database Assets
+  // 2. Initialize Game Logic
   const initializeGame = () => {
     if (!currentLevelData) return;
 
@@ -60,7 +61,6 @@ const MemoryMatchPage = () => {
     setIsWon(false);
   };
 
-  // Trigger game init when levels load or level index changes
   useEffect(() => {
     if (dbLevels.length > 0) {
       initializeGame();
@@ -85,7 +85,7 @@ const MemoryMatchPage = () => {
 
       if (cards[first].emoji === cards[second].emoji) {
         playMatch();
-        setTimeout(() => {
+        setTimeout(async () => {
           const matchedCards = [...cards];
           matchedCards[first].isMatched = true;
           matchedCards[second].isMatched = true;
@@ -94,6 +94,14 @@ const MemoryMatchPage = () => {
           
           if (matchedCards.every((c) => c.isMatched)) {
             setIsWon(true);
+            
+            // Update Stats: Completion gives 20 points
+            await StatsService.updateUserStats(
+              20, 
+              `memory_${currentLevelData.id}`, 
+              true
+            );
+
             playCelebration();
             levelComplete();
             speakText(`Level ${levelIndex + 1} cleared!`);
@@ -101,6 +109,9 @@ const MemoryMatchPage = () => {
         }, 400);
       } else {
         playWrong();
+        // Track a mismatch as a 'wrongPick'
+        StatsService.updateUserStats(0, null, false, "wrongPicks");
+
         setTimeout(() => {
           const resetCards = [...cards];
           resetCards[first].isFlipped = false;
@@ -123,7 +134,6 @@ const MemoryMatchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
-      
       <div className={`fixed inset-0 bg-gradient-to-br ${currentColor} opacity-5 blur-[150px] pointer-events-none transition-all duration-1000`} />
 
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
@@ -135,7 +145,7 @@ const MemoryMatchPage = () => {
           <div className="text-center">
             <h1 className="text-xl font-black italic tracking-tighter uppercase">Brain Scan</h1>
             <div className="flex items-center justify-center gap-1.5">
-              <Sparkles className={`w-3 h-3 text-primary animate-pulse`} />
+              <Sparkles className="w-3 h-3 text-primary animate-pulse" />
               <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
                 {currentLevelData?.theme || 'Memory'} Mode
               </span>
@@ -149,7 +159,6 @@ const MemoryMatchPage = () => {
       </header>
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
-        
         <div className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] border border-white/10 shadow-2xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
@@ -177,7 +186,6 @@ const MemoryMatchPage = () => {
                 className="aspect-square relative perspective-1000 group"
               >
                 <div className={`relative w-full h-full transition-all duration-500 preserve-3d ${card.isFlipped || card.isMatched ? 'rotate-y-180' : ''}`}>
-                  
                   <div className={`absolute inset-0 backface-hidden rounded-[2rem] flex items-center justify-center text-4xl font-black shadow-xl border border-white/10
                     ${card.isMatched ? 'bg-emerald-500/20 border-emerald-500/50' : `bg-gradient-to-br ${currentColor} border-white/30`} 
                     rotate-y-180`}
@@ -225,7 +233,7 @@ const MemoryMatchPage = () => {
                    </div>
                    <div className="border-l border-white/10">
                      <p className="text-[10px] font-black text-white/30 uppercase">Accuracy</p>
-                     <p className="text-xl font-black">{Math.round((currentLevelData?.emojis.length / moves) * 100)}%</p>
+                     <p className="text-xl font-black">{Math.round(((cards.length / 2) / moves) * 100)}%</p>
                    </div>
                 </div>
 

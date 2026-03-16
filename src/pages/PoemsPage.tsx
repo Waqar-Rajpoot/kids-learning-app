@@ -3,11 +3,12 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX, Home, Music, Sparkles, Boo
 import { useNavigate } from 'react-router-dom';
 import { speakText } from '@/lib/speech';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playTap, playPop } from '@/lib/sounds';
+import { playTap, playPop, playCorrect } from '@/lib/sounds'; // Added playCorrect for reward sound
 
-// Firebase Imports
+// Firebase & Stats Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService'; // Import your new central service
 
 const PoemsPage = () => {
   const [items, setItems] = useState([]);
@@ -16,11 +17,8 @@ const PoemsPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 1. Fetch Dynamic Poems from Firestore
   useEffect(() => {
-    // Assuming you might want them ordered by title or a 'sort' field
     const q = query(collection(db, "poems"), orderBy("title", "asc"));
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetched = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -32,7 +30,6 @@ const PoemsPage = () => {
       console.error("Firestore Poems Error:", error);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -61,7 +58,23 @@ const PoemsPage = () => {
 
     setIsReading(true);
     const text = currentPoem.lines.join('... ');
-    speakText(text, () => setIsReading(false));
+    
+    // The Callback function runs when the voice finishes reading
+    speakText(text, () => {
+      setIsReading(false);
+      
+      // TRIGGER STATS UPDATE HERE
+      // We use the dynamic ID from Firestore and increment the 'poemsRead' counter
+      StatsService.updateUserStats(
+        10, 
+        `poem-${currentPoem.id}`, 
+        true, 
+        "poemsRead"
+      );
+      
+      // Play a happy reward sound
+      playCorrect();
+    });
   };
 
   const stopReading = () => {
@@ -69,7 +82,6 @@ const PoemsPage = () => {
     setIsReading(false);
   };
 
-  // Loading View
   if (loading) {
     return (
       <div className="h-screen bg-[#0f172a] flex flex-col items-center justify-center text-white">
@@ -79,7 +91,6 @@ const PoemsPage = () => {
     );
   }
 
-  // Handle empty state
   if (items.length === 0) {
     return (
       <div className="h-screen bg-[#0f172a] flex flex-col items-center justify-center text-white p-6 text-center">
@@ -91,7 +102,6 @@ const PoemsPage = () => {
 
   return (
     <div className="h-screen flex flex-col bg-[#0f172a] text-white font-display overflow-hidden relative">
-      
       {/* 1. Dynamic Background Aura */}
       <div className="fixed inset-0 pointer-events-none">
         <AnimatePresence mode="wait">
@@ -115,13 +125,11 @@ const PoemsPage = () => {
           >
             <Home className="w-5 h-5" />
           </button>
-
           <div className="text-center">
             <h1 className="text-xl font-black text-white tracking-tighter flex items-center gap-2 uppercase italic">
               Magic Tales <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             </h1>
           </div>
-
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all duration-500 ${isReading ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'}`}>
             <Music className={`w-5 h-5 ${isReading ? 'text-primary animate-bounce' : 'text-white/30'}`} />
           </div>
@@ -142,7 +150,6 @@ const PoemsPage = () => {
             <div className={`p-8 bg-gradient-to-br ${currentPoem?.color || 'from-primary to-purple-600'} relative shrink-0`}>
               <div className="absolute inset-0 bg-white/10 backdrop-blur-sm opacity-20" />
               <div className="absolute inset-0 bg-[grid-white_20px] opacity-10" />
-              
               <div className="relative z-10 flex flex-col items-center text-center">
                 <motion.span
                   initial={{ scale: 0, rotate: -20 }}

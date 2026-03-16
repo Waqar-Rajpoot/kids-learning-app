@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Eraser, Trash2, Download, Minus, Plus, Smile, Palette, Home, Sparkles, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { speakText } from '@/lib/speech';
-import { playTap, playPop, playWhoosh, playStar } from '@/lib/sounds';
+import { playTap, playPop, playWhoosh, playStar, playCorrect } from '@/lib/sounds'; // Added playCorrect
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Stats Import
+import { StatsService } from '@/services/statsService';
 
 const colors = [
   '#f43f5e', '#fb923c', '#fbbf24', '#22c55e', '#06b6d4',
@@ -168,8 +171,15 @@ const DrawingPage = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Reward the child
+      playCorrect();
       speakText('Drawing saved!');
       toast.success('Masterpiece saved to your logs!');
+
+      // UPDATE STATS HERE
+      await StatsService.updateUserStats(15, "canvas-creative-art", true, "drawingsCreated");
+
     } catch (err) {
       toast.error('Could not save drawing.');
     }
@@ -177,14 +187,11 @@ const DrawingPage = () => {
 
   return (
     <div className="h-screen bg-[#0f172a] text-white flex flex-col overflow-hidden select-none font-display relative">
-      
-      {/* 1. Space Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[100px] rounded-full" />
       </div>
 
-      {/* 2. Command Header */}
       <header className="h-20 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 shrink-0 flex items-center px-6 z-50">
         <div className="max-w-lg mx-auto w-full flex items-center justify-between">
           <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -209,8 +216,6 @@ const DrawingPage = () => {
       </header>
 
       <main className="flex-1 max-w-lg mx-auto px-4 py-4 flex flex-col w-full overflow-hidden gap-4 relative z-10">
-        
-        {/* 3. The Canvas (The "Window to Space") */}
         <div
           ref={containerRef}
           className="flex-1 bg-white rounded-[3rem] shadow-[0_0_40px_rgba(0,0,0,0.5)] border-[12px] border-white/5 overflow-hidden touch-none relative min-h-0 group"
@@ -262,10 +267,7 @@ const DrawingPage = () => {
           </AnimatePresence>
         </div>
 
-        {/* 4. Controls Matrix */}
         <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] p-5 border border-white/10 shadow-2xl space-y-5 shrink-0">
-          
-          {/* Tool Selection */}
           <div className="flex gap-4">
             <button
               onClick={() => { setShowStickers(!showStickers); setIsEraser(false); }}
@@ -289,7 +291,6 @@ const DrawingPage = () => {
             </button>
           </div>
 
-          {/* Color Spectrum */}
           <div className="flex flex-wrap gap-2.5 justify-center py-4 border-y border-white/5">
             {colors.map((color) => (
               <button
@@ -305,7 +306,6 @@ const DrawingPage = () => {
             ))}
           </div>
 
-          {/* Calibration & Reset */}
           <div className="flex items-center gap-4 justify-between">
             <div className="flex items-center gap-2 bg-white/5 border border-white/5 p-2 rounded-[2rem]">
               <button

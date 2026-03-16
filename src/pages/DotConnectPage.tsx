@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Home, PenTool, Activity, ChevronRight, Loader2 } from 'lucide-react';
 import { speakText } from '@/lib/speech';
-import { playTap, playStar, playCelebration } from '@/lib/sounds';
+import { playTap, playStar, playCelebration, playWrong } from '@/lib/sounds';
 import { emojiCannon, starBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService';
 
 const DotConnectPage = () => {
   const [dbLevels, setDbLevels] = useState([]);
@@ -19,7 +20,7 @@ const DotConnectPage = () => {
   const [isWon, setIsWon] = useState(false);
   const navigate = useNavigate();
 
-  // 1. Fetch Vector Schemas from 'vectorLevels' collection
+  // 1. Fetch Vector Schemas
   useEffect(() => {
     const q = query(collection(db, "vectorLevels"), orderBy("order", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -42,9 +43,10 @@ const DotConnectPage = () => {
   const currentShape = dbLevels[levelIndex];
   const shapeDots = currentShape?.dots || [];
 
-  const handleDotClick = (index: number) => {
+  const handleDotClick = async (index: number) => {
     if (isWon || loading || !currentShape) return;
 
+    // Correct Dot Clicked
     if (index === connected.length) {
       playTap();
       playStar();
@@ -54,11 +56,25 @@ const DotConnectPage = () => {
 
       if (newConnected.length === shapeDots.length) {
         setIsWon(true);
+        
+        // Update Stats: Award 15 points and increment drawingsCreated
+        await StatsService.updateUserStats(
+          15, 
+          `vector_${currentShape.id}`, 
+          true, 
+          "drawingsCreated"
+        );
+
         playCelebration();
         emojiCannon();
         setTimeout(() => starBurst(), 300);
         speakText(`Vector complete. ${currentShape.name} data stabilized.`);
       }
+    } 
+    // Wrong Dot Clicked (Out of sequence)
+    else if (!connected.includes(index)) {
+      playWrong();
+      StatsService.updateUserStats(0, null, false, "wrongPicks");
     }
   };
 
@@ -120,7 +136,6 @@ const DotConnectPage = () => {
               style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
 
             <svg viewBox="0 0 200 200" className="w-full h-full relative z-10 filter drop-shadow-[0_0_8px_rgba(236,72,153,0.4)]">
-              {/* Lines using x and y coordinates from Firebase */}
               {connected.length > 1 && connected.map((dotIdx, i) => {
                 if (i === 0) return null;
                 const prev = shapeDots[connected[i - 1]];
@@ -137,7 +152,6 @@ const DotConnectPage = () => {
                 );
               })}
 
-              {/* Close-Loop Line for Victory */}
               {isWon && shapeDots.length > 0 && (
                 <motion.line
                   initial={{ pathLength: 0 }}
@@ -151,7 +165,6 @@ const DotConnectPage = () => {
                 />
               )}
 
-              {/* Data Nodes using x/y from dots array */}
               {shapeDots.map((dot, i: number) => {
                 const isConnected = connected.includes(i);
                 const isNext = i === connected.length;
@@ -188,7 +201,6 @@ const DotConnectPage = () => {
           </motion.div>
         </div>
 
-        {/* Success Modal */}
         <AnimatePresence>
           {isWon && (
             <motion.div
@@ -214,11 +226,8 @@ const DotConnectPage = () => {
 
                 <button
                   onClick={() => {
-                    // Reset local state first to prevent render glitches
                     setConnected([0]);
                     setIsWon(false);
-
-                    // Check if we are at the last level
                     if (levelIndex < dbLevels.length - 1) {
                       setLevelIndex(prev => prev + 1);
                     } else {

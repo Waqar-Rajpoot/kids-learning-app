@@ -38,7 +38,7 @@ import SpellingPage from "./pages/SpellingPage";
 import NumbersPage from "./pages/NumbersPage";
 import DrawingPage from "./pages/DrawingPage";
 import ItemDetailPage from "./pages/ItemDetailPage";
-import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Admin Pages
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -145,9 +145,6 @@ const AppContent = () => {
                   {!user ? (
                     <Route path="*" element={<Navigate to="/login" replace />} />
                   ) : isAdmin ? (
-                    /* -----------------------------------------------------------
-                       ADMIN-ONLY ROUTE TREE
-                       ----------------------------------------------------------- */
                     <>
                       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                       <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
@@ -168,9 +165,6 @@ const AppContent = () => {
                       <Route path="*" element={<Navigate to="/admin" replace />} />
                     </>
                   ) : (
-                    /* -----------------------------------------------------------
-                       USER-ONLY ROUTE TREE
-                       ----------------------------------------------------------- */
                     <>
                       <Route path="/" element={<Index />} />
                       <Route path="/animals" element={<AnimalsPage />} />
@@ -188,7 +182,7 @@ const AppContent = () => {
                       <Route path="/spelling" element={<SpellingPage />} />
                       <Route path="/numbers" element={<NumbersPage />} />
                       <Route path="/drawing" element={<DrawingPage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/profile" element={<ProfilePage />} />
                       
                       {/* CATCH-ALL FOR USER: Block access to admin routes */}
                       <Route path="/admin/*" element={<Navigate to="/" replace />} />

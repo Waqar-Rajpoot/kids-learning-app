@@ -6,9 +6,10 @@ import { playTap, playCorrect, playWrong, playCelebration } from '@/lib/sounds';
 import { fireBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Stats
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService';
 
 const ShadowMatchPage = () => {
   const [dbLevels, setDbLevels] = useState([]);
@@ -35,12 +36,9 @@ const ShadowMatchPage = () => {
   useEffect(() => {
     if (dbLevels.length > 0 && dbLevels[levelIndex]) {
       const current = dbLevels[levelIndex].item;
-      
-      // Get all items from DB to create distractors
       const allItems = dbLevels.map(l => l.item);
       const others = allItems.filter(i => i !== current);
       
-      // Shuffle distractors and pick 3, then combine with current and shuffle again
       const shuffled = [
         current, 
         ...others.sort(() => Math.random() - 0.5).slice(0, 3)
@@ -53,7 +51,7 @@ const ShadowMatchPage = () => {
     }
   }, [levelIndex, dbLevels]);
 
-  const handleOptionClick = (item: string, index: number) => {
+  const handleOptionClick = async (item: string, index: number) => {
     if (isWon || loading) return;
     const currentLevel = dbLevels[levelIndex];
     playTap();
@@ -64,10 +62,27 @@ const ShadowMatchPage = () => {
       playCelebration();
       fireBurst();
       speakText(`Match confirmed! Profile identified as ${currentLevel.name}`);
+
+      // Award 20 XP for correct identification
+      await StatsService.updateUserStats(
+        20, 
+        currentLevel.id, 
+        true, 
+        "totalAnomaliesFound"
+      );
     } else {
       playWrong();
       setWrongPick(index);
       speakText('Negative match. Try again.');
+      
+      // Track the mistake in Firestore (0 XP awarded)
+      await StatsService.updateUserStats(
+        0, 
+        null, 
+        false, 
+        "wrongPicks"
+      );
+      
       setTimeout(() => setWrongPick(null), 500);
     }
   };
@@ -90,7 +105,6 @@ const ShadowMatchPage = () => {
         <div className="absolute bottom-[10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 blur-[120px] rounded-full" />
       </div>
 
-      {/* Command Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
         <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
           <button onClick={() => navigate('/')} className="w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -113,7 +127,6 @@ const ShadowMatchPage = () => {
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-6 flex flex-col gap-6 relative z-10">
         
-        {/* Instruction Module */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -128,7 +141,6 @@ const ShadowMatchPage = () => {
           </div>
         </motion.div>
 
-        {/* Scanning Pad */}
         <div className="flex-1 flex flex-col items-center justify-center gap-10">
           <motion.div 
             initial={{ scale: 0.9 }}
@@ -150,7 +162,6 @@ const ShadowMatchPage = () => {
             </div>
           </motion.div>
 
-          {/* Option Grid */}
           <div className="grid grid-cols-2 gap-5 w-full">
             {options.map((opt, i) => (
               <motion.button
@@ -173,7 +184,6 @@ const ShadowMatchPage = () => {
           </div>
         </div>
 
-        {/* Victory Overlay */}
         <AnimatePresence>
           {isWon && (
             <motion.div 

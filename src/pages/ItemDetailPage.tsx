@@ -1,18 +1,21 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Home, Volume2, ChevronLeft, Heart, Utensils, Info, Music, Sparkles } from 'lucide-react';
+import { Home, Volume2, ChevronLeft, Heart, Utensils, Music, Sparkles } from 'lucide-react';
 import { speakText, playAnimalSound, hasSFX } from '@/lib/speech';
 import { motion } from 'framer-motion';
 import { playTap, playCelebration } from '@/lib/sounds';
 import { starBurst, quickPop } from '@/lib/confetti';
 
+// Stats Service
+import { StatsService, StatCategory } from '@/services/statsService';
+
 const ItemDetailPage = () => {
   const { category, id } = useParams();
   const navigate = useNavigate();
+  const hasAwardedXp = useRef(false); // Prevent duplicate XP on re-renders
 
-  // State to hold the database item
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,13 +25,32 @@ const ItemDetailPage = () => {
       
       setLoading(true);
       try {
-        // Fetches directly from the collection named after your category (e.g., "animals")
-        // If your collection name is different (like "learning"), change the string below
         const docRef = doc(db, "learning_items", id); 
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setItem({ id: docSnap.id, ...docSnap.data() });
+          const itemData = { id: docSnap.id, ...docSnap.data() };
+          setItem(itemData);
+
+          // Award XP for "Discovering" this item
+          if (!hasAwardedXp.current) {
+            hasAwardedXp.current = true;
+            
+            // Map the URL category to our StatCategory type
+            const categoryMap: Record<string, StatCategory> = {
+              animals: "totalAnomaliesFound", // Using this as 'General Discovery'
+              birds: "totalAnomaliesFound",
+              fruits: "totalAnomaliesFound",
+              poems: "poemsRead"
+            };
+
+            await StatsService.updateUserStats(
+              10, 
+              id, 
+              true, 
+              categoryMap[category || ''] || "gamesPlayed"
+            );
+          }
         } else {
           console.error("No such item in database!");
         }
@@ -40,7 +62,7 @@ const ItemDetailPage = () => {
     };
 
     fetchItemFromFirestore();
-  }, [id]);
+  }, [id, category]);
 
   const getCategoryGradient = () => {
     switch (category) {
@@ -51,7 +73,6 @@ const ItemDetailPage = () => {
     }
   };
 
-  // 1. Loading State UI
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
@@ -63,7 +84,6 @@ const ItemDetailPage = () => {
     );
   }
 
-  // 2. Not Found UI
   if (!item) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
@@ -81,7 +101,6 @@ const ItemDetailPage = () => {
     );
   }
 
-  // Helpers for actions
   const itemName = item.name || "Unknown";
 
   const handlePronounce = () => {
@@ -113,13 +132,10 @@ const ItemDetailPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0f172a] text-white font-display overflow-hidden relative">
-      
-      {/* Dynamic Background Aura */}
       <div className="fixed inset-0 pointer-events-none">
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br ${getCategoryGradient()} opacity-20 blur-[180px] rounded-full animate-pulse`} />
       </div>
 
-      {/* Glassmorphic Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 px-4 py-4">
         <div className="flex items-center justify-between w-full max-w-lg mx-auto">
           <button 
@@ -136,7 +152,7 @@ const ItemDetailPage = () => {
             <div className="flex items-center justify-center gap-1.5 mt-0.5">
               <Sparkles className="w-3 h-3 text-primary animate-pulse" />
               <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
-                {category} Expert
+                {category?.slice(0, -1)} Expert
               </p>
             </div>
           </div>
@@ -152,8 +168,6 @@ const ItemDetailPage = () => {
 
       <main className="flex-1 px-4 py-8 overflow-y-auto no-scrollbar relative z-10">
         <div className="max-w-lg mx-auto space-y-8">
-          
-          {/* Hero Visual Container */}
           <motion.div 
             initial={{ scale: 0.8, opacity: 0, rotate: -5 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -184,7 +198,6 @@ const ItemDetailPage = () => {
             </div>
           </motion.div>
 
-          {/* Glass Info Cards */}
           <div className="grid gap-4">
             {item.food && (
               <motion.div 
@@ -222,7 +235,6 @@ const ItemDetailPage = () => {
             )}
           </div>
 
-          {/* Giant Action Button */}
           <motion.button 
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}

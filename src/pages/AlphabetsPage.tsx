@@ -6,9 +6,10 @@ import { playTap, playPop, playStar } from '@/lib/sounds';
 import { fireBasicConfetti } from '@/lib/confetti';
 import { motion } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService'; // Added StatsService
 
 const penColors = ['#a855f7', '#f472b6', '#38bdf8', '#4ade80', '#fbbf24', '#f87171'];
 
@@ -26,10 +27,8 @@ const AlphabetsPage = () => {
 
     const currentItem = items[currentIndex];
 
-    // 1. Fetch from the specific 'alphabets' collection
     useEffect(() => {
         const q = query(collection(db, "alphabets"), orderBy("letter", "asc"));
-
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetched = snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -41,22 +40,17 @@ const AlphabetsPage = () => {
             console.error("Firestore Error:", error);
             setLoading(false);
         });
-
         return () => unsubscribe();
     }, []);
 
-    // 2. Canvas Setup
     useEffect(() => {
         if (loading || !currentItem) return;
-
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
-
         const ctx = canvas.getContext('2d');
         if (ctx) {
             ctx.scale(dpr, dpr);
@@ -70,21 +64,15 @@ const AlphabetsPage = () => {
     const drawGuide = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
         ctx.clearRect(0, 0, width, height);
         ctx.shadowBlur = 0;
-
-        // Tracing Guide
         ctx.font = '900 350px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#1e293b'; 
         ctx.fillText(currentItem.letter, width / 2, height / 2 + 15);
-
-        // Dashed outline
         ctx.strokeStyle = '#334155';
         ctx.lineWidth = 4;
         ctx.setLineDash([15, 15]);
         ctx.strokeText(currentItem.letter, width / 2, height / 2 + 15);
-
-        // Pen Config
         ctx.setLineDash([]);
         ctx.strokeStyle = activeColor;
         ctx.shadowBlur = 10;
@@ -94,15 +82,23 @@ const AlphabetsPage = () => {
 
     const handleSpeak = () => {
         playTap();
-        // Uses the word and phonics from your AlphabetItem interface
         speakText(`${currentItem.letter}... ${currentItem.phonics}... ${currentItem.word}`);
     };
 
-    const goNext = () => {
+    const goNext = async () => {
         if (hasDrawn) {
             fireBasicConfetti();
             playStar();
             speakText("Great job!");
+
+            // UPDATE STATS HERE
+            // We use the letter to create a unique activity ID
+            await StatsService.updateUserStats(
+                5, 
+                `letter-${currentItem.letter.toLowerCase()}-learning`, 
+                true, 
+                "alphabetsLearned"
+            );
         }
         playPop();
         setCurrentIndex(prev => (prev + 1) % items.length);

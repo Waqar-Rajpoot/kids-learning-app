@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dog,
@@ -6,20 +7,18 @@ import {
   Type,
   Hash,
   Palette,
-  Cat,
   Sparkles,
   Languages,
-  LogOut,
   Shield,
+  Trophy,
+  Zap,
+  User,
 } from "lucide-react";
 import ModuleCard from "@/components/ModuleCard";
 import { motion } from "framer-motion";
 import { playTap } from "@/lib/sounds";
 import { auth } from "@/lib/firebase";
-import { AuthService } from "@/services/auth.service";
-import { toast } from "sonner";
-// import { appendNewShadowLevels } from "@/lib/db-utils";
-import { useEffect } from "react";
+import { StatsService, UserStats } from "@/services/statsService";
 
 const modules = [
   {
@@ -82,81 +81,90 @@ const modules = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState<UserStats | null>(null);
   const userName = auth.currentUser?.displayName || "Explorer";
 
-  const handleLogout = async () => {
-    try {
-      playTap();
-      await AuthService.logout();
-      toast.success("See you soon!");
-    } catch (error) {
-      toast.error("Logout failed");
-    }
-  };
+  // Initialize and Fetch Stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      const currentStats = await StatsService.initStats();
+      setStats(currentStats);
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white selection:bg-primary/30 overflow-x-hidden font-display">
-      {/* Background Decorative Blobs - Matching Settings */}
+      {/* Background Decorative Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* Aesthetic Header */}
       <header className="relative px-4 pt-8 pb-6 max-w-5xl mx-auto flex items-center justify-between z-50">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-              Bright <span className="text-primary font-medium">Learning</span>
+            <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase italic">
+              Bright <span className="text-primary">Learning</span>
             </h1>
-            <p className="text-white/40 text-[10px] font-medium flex items-center gap-1">
-              <Shield className="w-3 h-3" /> Secure Learning Environment
+            <p className="text-white/40 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+              <Shield className="w-3 h-3 text-emerald-500" /> Secure Lab Active
             </p>
           </div>
         </div>
 
         <div className="flex gap-2">
           <button
-            onClick={() => {
-              playTap();
-              navigate("/settings");
-            }}
+            onClick={() => { playTap(); navigate("/profile"); }}
             className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all active:scale-95 text-white/70"
           >
-            <Cat className="w-6 h-6" />
-          </button>
-          <button
-            onClick={handleLogout}
-            className="p-3 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-2xl hover:bg-red-500 transition-all active:scale-95 text-red-400 hover:text-white"
-          >
-            <LogOut className="w-6 h-6" />
+            <User className="w-6 h-6" />
           </button>
         </div>
       </header>
 
       <main className="relative px-4 max-w-5xl mx-auto space-y-6 pb-24 z-10">
-        {/* Aesthetic Welcome Banner */}
+        {/* Aesthetic Welcome Banner with Live Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-8 transition-all hover:border-white/20 shadow-2xl"
+          className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-8 transition-all hover:border-white/20 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
 
           <div className="relative z-10">
-            <h2 className="text-3xl font-black mb-2 font-display text-white tracking-tight">
+            <h2 className="text-3xl font-black mb-2 font-display text-white tracking-tight italic">
               Hi, <span className="text-primary">{userName}</span>!
             </h2>
-            <p className="text-white/40 font-medium text-base">
-              Ready for your next magic quest today?
+            <p className="text-white/40 font-black uppercase tracking-widest text-xs">
+              Ready for your next magic quest?
             </p>
+          </div>
+
+          {/* Quick Stats Grid */}
+          <div className="relative z-10 flex gap-4 w-full md:w-auto">
+            <div className="flex-1 md:flex-none px-6 py-3 bg-black/40 rounded-3xl border border-white/5 flex flex-col items-center">
+              <div className="flex items-center gap-2 text-orange-500 mb-1">
+                <Zap className="w-4 h-4" />
+                <span className="text-xl font-black tracking-tighter">{stats?.totalXp || 0}</span>
+              </div>
+              <span className="text-[8px] font-black uppercase text-white/30 tracking-widest">Total XP</span>
+            </div>
+
+            <div className="flex-1 md:flex-none px-6 py-3 bg-black/40 rounded-3xl border border-white/5 flex flex-col items-center">
+              <div className="flex items-center gap-2 text-primary mb-1">
+                <Trophy className="w-4 h-4" />
+                <span className="text-xl font-black tracking-tighter">#{stats?.rank || "--"}</span>
+              </div>
+              <span className="text-[8px] font-black uppercase text-white/30 tracking-widest">Global Rank</span>
+            </div>
           </div>
         </motion.div>
 
-        {/* Modules Grid - Refined Spacing */}
+        {/* Modules Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {modules.map((module, idx) => (
             <motion.div
@@ -168,8 +176,6 @@ const Index = () => {
             >
               <ModuleCard
                 {...module}
-                // We keep the logic for large/small, but ModuleCard should
-                // now use the same glassmorphic classes as SettingCard
                 variant={idx === 0 ? "large" : "small"}
               />
             </motion.div>

@@ -6,9 +6,10 @@ import { playTap, playWrong, playCelebration } from '@/lib/sounds';
 import { starBurst } from '@/lib/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService'; // Added StatsService
 
 const OddOneOutPage = () => {
   const [dbLevels, setDbLevels] = useState([]);
@@ -52,10 +53,29 @@ const OddOneOutPage = () => {
       playCelebration();
       starBurst();
       speakText(`Anomaly neutralized! ${currentLevel.msg}`);
+
+      // TRIGGER STATS UPDATE HERE
+      // Rewarding 20 points for finding the anomaly
+      StatsService.updateUserStats(
+        20, 
+        `odd-one-${currentLevel.id}`, 
+        true, 
+        "totalAnomaliesFound"
+      );
+
     } else {
       playWrong();
       setWrongPick(index);
       speakText('Negative. Try again.');
+      
+      // LOG INCORRECT PICK
+      // Passing 'false' for isCorrect to increment the wrongPicks counter
+      StatsService.updateUserStats(
+        0, 
+        `odd-one-${currentLevel.id}-fail`, 
+        false
+      );
+
       setTimeout(() => setWrongPick(null), 500);
     }
   };
@@ -71,7 +91,6 @@ const OddOneOutPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
-      
       {/* Cyber-Glow Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[10%] left-[-5%] w-[60%] h-[60%] bg-emerald-500/5 blur-[120px] rounded-full" />

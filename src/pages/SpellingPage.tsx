@@ -15,9 +15,10 @@ import { starBurst, quickPop } from "@/lib/confetti";
 import { playTap, playCorrect, playWrong } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query } from "firebase/firestore";
+import { StatsService } from "@/services/statsService"; // Ensure this path is correct
 
 const SpellingPage = () => {
   const [words, setWords] = useState([]);
@@ -92,15 +93,31 @@ const SpellingPage = () => {
     quickPop();
   };
 
-  const checkAnswer = () => {
+  const checkAnswer = async () => {
     const answer = userInput.join("");
     const correct = answer === currentWord.word;
     setIsCorrect(correct);
+
     if (correct) {
+      // --- UPDATE USER STATS ---
+      try {
+        await StatsService.updateUserStats(
+          10, // Award 10 points for mastering a word
+          `spelling-${currentWord.id}`, // Unique Activity ID
+          true, // Increment a specific stat field
+          "spellingsMastered" // Field matching your user stats schema
+        );
+      } catch (error) {
+        console.error("Failed to update spelling stats:", error);
+      }
+
       playCorrect();
       starBurst();
       speak(`Excellent! ${currentWord.word} decoded.`);
     } else {
+      // track a 'wrongPick' if you want to use that stat field
+      StatsService.updateUserStats(0, null, true, "wrongPicks"); 
+      
       playWrong();
       speak("Sequence error. Try again!");
     }
@@ -120,13 +137,11 @@ const SpellingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-display flex flex-col overflow-hidden relative">
-      {/* Ambient Background Elements */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[50%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-indigo-500/5 blur-[120px] rounded-full" />
       </div>
 
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 h-20 flex items-center">
         <div className="max-w-lg mx-auto px-6 flex items-center justify-between w-full">
           <button
@@ -152,7 +167,6 @@ const SpellingPage = () => {
       </header>
 
       <main className="max-w-md mx-auto px-6 py-6 w-full flex flex-col gap-6 relative z-10">
-        {/* Progress Tracker */}
         <div className="bg-white/5 p-2 rounded-2xl border border-white/5 flex gap-1.5">
           {words.map((_, i) => (
             <div
@@ -168,7 +182,6 @@ const SpellingPage = () => {
           ))}
         </div>
 
-        {/* Main Word Card */}
         {currentWord && (
           <motion.div
             layout
@@ -197,7 +210,6 @@ const SpellingPage = () => {
               Vocalize Output
             </button>
 
-            {/* Answer Display */}
             <div className="flex justify-center flex-wrap gap-2">
               {currentWord.word.split("").map((_, i) => (
                 <motion.div
@@ -224,7 +236,6 @@ const SpellingPage = () => {
               ))}
             </div>
 
-            {/* Letter Selection Grid */}
             <div className="grid grid-cols-5 gap-3 pt-4 border-t border-white/5">
               <AnimatePresence mode="popLayout">
                 {availableLetters.map((letter, i) => (
@@ -245,7 +256,6 @@ const SpellingPage = () => {
               </AnimatePresence>
             </div>
 
-            {/* Action Controls */}
             <div className="flex gap-4">
               <button
                 onClick={shuffleLetters}
@@ -277,7 +287,6 @@ const SpellingPage = () => {
         )}
       </main>
 
-      {/* Success Sparkle Effect */}
       {isCorrect && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
           <Sparkles className="w-32 h-32 text-emerald-400/20 animate-ping" />

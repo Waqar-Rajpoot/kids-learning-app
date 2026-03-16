@@ -6,9 +6,10 @@ import LearningCard from '@/components/LearningCard';
 import CategoryTabs from '@/components/CategoryTabs';
 import { playTap } from '@/lib/sounds';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService';
 
 const categories = [
   { id: 'animal', label: 'Animals', emoji: '🦁' }, 
@@ -56,11 +57,13 @@ const AnimalsPage = () => {
     return () => unsubscribe();
   }, [activeCategory]);
 
-  const handleCategoryChange = (cat: string) => {
+  const handleCategoryChange = async (cat: string) => {
     playTap();
     setActiveCategory(cat);
     
-    // Update URL when tab changes to keep parentPath in sync
+    // Log exploration stat (Small XP boost for exploring new categories)
+    await StatsService.updateUserStats(5, `explore_${cat}`, true);
+    
     const pathMap: Record<string, string> = {
       animal: '/animals',
       bird: '/birds',
@@ -137,7 +140,6 @@ const AnimalsPage = () => {
       <main className="flex-1 px-4 py-6 pb-24 relative z-10 scrollbar-hide">
         <div className="max-w-lg mx-auto">
           
-          {/* Stats Badge */}
           <div className="flex justify-center mb-10">
             <AnimatePresence mode="wait">
               <motion.div 
@@ -154,7 +156,6 @@ const AnimalsPage = () => {
             </AnimatePresence>
           </div>
 
-          {/* Grid of Items */}
           <div className="grid grid-cols-2 gap-5 min-h-[300px]">
             {loading ? (
               <div className="col-span-2 flex flex-col items-center justify-center py-20 text-white/40">
@@ -178,7 +179,7 @@ const AnimalsPage = () => {
                       emoji={item.emoji}
                       color={item.color}
                       category={activeCategory}
-                      parentPath={parentPath} // Re-added parentPath prop
+                      parentPath={parentPath}
                     />
                   </motion.div>
                 ))}

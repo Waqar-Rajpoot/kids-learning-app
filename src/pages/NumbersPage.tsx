@@ -5,9 +5,10 @@ import { speakText } from '@/lib/speech';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playTap, playPop } from '@/lib/sounds';
 
-// Firebase Imports
+// Firebase & Service Imports
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { StatsService } from '@/services/statsService'; // Added StatsService
 
 const NumbersPage = () => {
   const [items, setItems] = useState([]);
@@ -17,7 +18,6 @@ const NumbersPage = () => {
 
   // 1. Fetch Dynamic Numbers from Firestore
   useEffect(() => {
-    // Ordering by 'num' ensures the counter goes 1, 2, 3...
     const q = query(collection(db, "numbers"), orderBy("num", "asc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -34,7 +34,7 @@ const NumbersPage = () => {
 
   const currentNumber = items[currentIndex];
 
-  // 2. Auto-speak when index changes (only after loading)
+  // 2. Auto-speak when index changes
   useEffect(() => {
     if (!loading && currentNumber) {
       speakText(`${currentNumber.num}`);
@@ -50,6 +50,15 @@ const NumbersPage = () => {
 
   const goNext = () => {
     if (currentIndex < items.length - 1) {
+      // TRIGGER STATS UPDATE
+      // Reward 5 points for completing the current number
+      StatsService.updateUserStats(
+        5, 
+        `number-${currentNumber.num}-learning`, 
+        true, 
+        "numbersLearned"
+      );
+
       playPop();
       setCurrentIndex(prev => prev + 1);
     }
@@ -76,13 +85,13 @@ const NumbersPage = () => {
   return (
     <div className="h-screen bg-[#0f172a] text-white flex flex-col overflow-hidden select-none font-display relative">
       
-      {/* 1. Ambient Background Glows */}
+      {/* Ambient Background Glows */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-500/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-600/5 blur-[100px] rounded-full" />
       </div>
 
-      {/* 2. Command Header */}
+      {/* Command Header */}
       <header className="h-24 bg-[#0f172a]/60 backdrop-blur-xl border-b border-white/5 shrink-0 flex items-center px-6 z-50">
         <div className="max-w-lg mx-auto w-full flex items-center justify-between">
           <button onClick={() => navigate('/')} className="w-14 h-14 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl active:scale-90 transition-all text-white/70">
@@ -103,7 +112,7 @@ const NumbersPage = () => {
         </div>
       </header>
 
-      {/* 3. Main Hologram Display */}
+      {/* Main Hologram Display */}
       <main className="flex-1 max-w-lg mx-auto w-full p-6 flex flex-col items-center justify-center relative">
         <AnimatePresence mode="wait">
           {currentNumber && (
@@ -155,7 +164,7 @@ const NumbersPage = () => {
         </AnimatePresence>
       </main>
 
-      {/* 4. Navigation Control Deck */}
+      {/* Navigation Control Deck */}
       <footer className="h-28 bg-[#0f172a]/80 backdrop-blur-xl border-t border-white/5 shrink-0 flex items-center px-6">
         <div className="max-w-lg mx-auto w-full flex items-center justify-between gap-6">
           <button 
