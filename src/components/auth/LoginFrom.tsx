@@ -104,12 +104,12 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-white/50 text-[10px] font-black uppercase tracking-[0.25em] ml-1">Parent's Email</FormLabel>
+                    <FormLabel className="text-white/50 text-[10px] font-black uppercase tracking-[0.25em] ml-1">Email Address</FormLabel>
                     <FormControl>
                       <div className="relative group">
                         <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-focus-within:text-primary transition-colors" />
                         <Input 
-                          placeholder="parent@example.com" 
+                          placeholder="child@example.com" 
                           className="pl-14 h-16 bg-white/5 border-white/10 rounded-2xl focus:ring-primary/40 focus:border-primary transition-all text-white placeholder:text-white/10 text-lg shadow-inner" 
                           {...field} 
                         />

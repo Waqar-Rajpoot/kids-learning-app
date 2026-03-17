@@ -4,7 +4,7 @@ import {
   indexedDBLocalPersistence, 
   initializeAuth, 
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // Import Firestore
+import { getFirestore } from "firebase/firestore"; 
 import { Capacitor } from "@capacitor/core";
 
 // Your specific configuration from Firebase
@@ -24,7 +24,6 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore
 const db = getFirestore(app);
 
-// Initialize Auth with persistence for Native (Android/iOS) and Web
 const auth = Capacitor.isNativePlatform()
   ? initializeAuth(app, {
       persistence: indexedDBLocalPersistence,
