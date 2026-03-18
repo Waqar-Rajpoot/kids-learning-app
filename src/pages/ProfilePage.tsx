@@ -8,6 +8,7 @@ import {
     Clock,
     CalendarDays,
     Calendar,
+    ZapIcon,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '@/context/AppSettingsContext';
@@ -36,6 +37,8 @@ interface FullUserStats {
     rank: string;
     badges: string[];
     stats: {
+        mathSolved: number;
+        mathPoints: number;
         poemsRead: number;
         drawingsCreated: number;
         spellingsMastered: number;
@@ -240,8 +243,10 @@ const ProfilePage = () => {
                         <MiniStatCard icon={Star} label="Spellings" value={stats?.stats.spellingsMastered || 0} color="bg-amber-500" />
                         <MiniStatCard icon={Hash} label="Numbers" value={stats?.stats.numbersLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Eye} label="Anomalies" value={stats?.stats.totalAnomaliesFound || 0} color="bg-emerald-500" />
-                        <MiniStatCard icon={XCircle} label="Wrong Picks" value={stats?.stats.wrongPicks || 0} color="bg-emerald-500" />
-                        <MiniStatCard icon={CalendarDays} label="Days Learned" value={stats?.stats.daysLearned || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={XCircle} label="Wrong Picks" value={stats?.stats.wrongPicks || 0} color="bg-yellow-500" />
+                        <MiniStatCard icon={CalendarDays} label="Days Learned" value={stats?.stats.daysLearned || 0} color="bg-blue-500" />
+                        <MiniStatCard icon={ZapIcon} label="Math Quests" value={stats?.stats.mathSolved || 0} color="bg-orange-500" />
+                        <MiniStatCard icon={ZapIcon} label="Math Points" value={stats?.stats.mathPoints || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Calendar} label="Months Learned" value={stats?.stats.monthsLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Clock} label="Time Spent" value={formatTime(stats?.stats.totalTimeSpent || 0)} color="bg-indigo-500" />
                     </div>

@@ -96,6 +96,14 @@ const modules = [
     Icon: Palette,
     emoji: "🎨",
   },
+  {
+    title: "Maths",
+    description: "Solve fun math problems",
+    path: "/math",
+    colorClass: "bg-fuchsia-500",
+    Icon: Zap,
+    emoji: "⚡",
+  },
 ];
 
 const UserDashboard = () => {

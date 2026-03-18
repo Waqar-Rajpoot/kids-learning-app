@@ -42,6 +42,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DaysPage from "./pages/DaysLearning";
 import MonthsPage from "./pages/MonthsLearning";
 import Leaderboard  from "./pages/Leaderboard";
+import MathQuest from "./pages/MathQuest";
 
 // Admin Pages
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -60,6 +61,7 @@ import { LearningManagement } from "./pages/admin/LearningManagement";
 import { StatsService } from "./services/statsService";
 import DaysManagement from "./pages/admin/DaysManagement";
 import MonthsManagement from "./pages/admin/MonthsManagement";
+import MathAdmin from "./pages/admin/MathAdmin";
 
 const queryClient = new QueryClient();
 
@@ -187,6 +189,7 @@ const AppContent = () => {
                       <Route path="/admin/learning" element={<AdminRoute><LearningManagement /></AdminRoute>} />
                       <Route path="/admin/days" element={<AdminRoute><DaysManagement /></AdminRoute>} />
                       <Route path="/admin/months" element={<AdminRoute><MonthsManagement /></AdminRoute>} />
+                      <Route path="/admin/math" element={<AdminRoute><MathAdmin /></AdminRoute>} />
 
                       {/* CATCH-ALL FOR ADMIN: If they hit root / or a user route, force them back to /admin */}
                       <Route path="/" element={<Navigate to="/admin" replace />} />
@@ -214,6 +217,7 @@ const AppContent = () => {
                       <Route path="/days" element={<DaysPage />} />
                       <Route path="/months" element={<MonthsPage />} />
                       <Route path="/leaderboard" element={<Leaderboard />} />
+                      <Route path="/math" element={<MathQuest />} />
 
                       {/* CATCH-ALL FOR USER: Block access to admin routes */}
                       <Route path="/admin/*" element={<Navigate to="/" replace />} />

@@ -52,6 +52,8 @@ export const AuthService = {
             monthsMastered: 0,
           },
           stats: {
+            mathSolved: 0,
+            mathPoints: 0,
             totalAnomaliesFound: 0,
             wrongPicks: 0,
             gamesPlayed: 0,
