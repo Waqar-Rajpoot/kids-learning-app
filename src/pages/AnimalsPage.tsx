@@ -47,7 +47,12 @@ const AnimalsPage = () => {
         id: doc.id,
         ...doc.data()
       }));
-      setItems(fetchedItems);
+
+      const sortedItems = fetchedItems.sort((a: any, b: any) => 
+      (a.name || "").localeCompare(b.name || "")
+    );
+
+      setItems(sortedItems);
       setLoading(false);
     }, (error) => {
       console.error("Firestore Error:", error);

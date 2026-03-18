@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.kidlearing.android',
-  appName: 'Kid Learing',
+  appId: 'kids.learning.app',
+  appName: 'kids_learning_app',
   webDir: 'dist'
 };
 
