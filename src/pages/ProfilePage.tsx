@@ -5,7 +5,9 @@ import {
     BookOpen, Palette, Type, Hash, Star, Zap, Flame,
     Eye,
     XCircle,
-    Clock
+    Clock,
+    CalendarDays,
+    Calendar,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '@/context/AppSettingsContext';
@@ -239,8 +241,8 @@ const ProfilePage = () => {
                         <MiniStatCard icon={Hash} label="Numbers" value={stats?.stats.numbersLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Eye} label="Anomalies" value={stats?.stats.totalAnomaliesFound || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={XCircle} label="Wrong Picks" value={stats?.stats.wrongPicks || 0} color="bg-emerald-500" />
-                        <MiniStatCard icon={XCircle} label="Days Learned" value={stats?.stats.daysLearned || 0} color="bg-emerald-500" />
-                        <MiniStatCard icon={XCircle} label="Months Learned" value={stats?.stats.monthsLearned || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={CalendarDays} label="Days Learned" value={stats?.stats.daysLearned || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={Calendar} label="Months Learned" value={stats?.stats.monthsLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Clock} label="Time Spent" value={formatTime(stats?.stats.totalTimeSpent || 0)} color="bg-indigo-500" />
                     </div>
 

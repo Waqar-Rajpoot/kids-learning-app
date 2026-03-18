@@ -15,6 +15,7 @@ import {
   User,
   ChevronRight,
   TrendingUp,
+  Sun,
 } from "lucide-react";
 import ModuleCard from "@/components/ModuleCard";
 import { motion } from "framer-motion";
