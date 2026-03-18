@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Volume2, Music, ArrowLeft, Sparkles, User, LogOut,
     Edit2, Check, X, Shield, Trash2, Trophy,
-    BookOpen, Palette, Type, Hash, Star, Zap, Flame
+    BookOpen, Palette, Type, Hash, Star, Zap, Flame,
+    Eye,
+    XCircle,
+    Clock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '@/context/AppSettingsContext';
@@ -26,6 +29,7 @@ import {
 interface FullUserStats {
     score: number;
     xp: number;
+    totalXp: number;
     level: number;
     rank: string;
     badges: string[];
@@ -38,8 +42,11 @@ interface FullUserStats {
         gamesPlayed: number;
         currentStreak: number;
         totalTimeSpent: number;
+        totalAnomaliesFound: number;
+        wrongPicks: number;
     };
 }
+
 
 // --- Sub-component: MiniStatCard (Mobile Optimized) ---
 const MiniStatCard = ({ icon, label, value, color }: { icon, label: string, value: number | string, color: string }) => (
@@ -98,13 +105,24 @@ const ProfilePage = () => {
         const loadStats = async () => {
             try {
                 const userStats = await StatsService.initStats();
+                console.log("Fetched user stats:", userStats);
                 setStats(userStats as unknown as FullUserStats);
+
             } catch (error) {
                 console.error("Failed to load stats", error);
             }
         };
         loadStats();
     }, []);
+
+    const formatTime = (seconds: number) => {
+    if (!seconds || seconds < 0) return "0m";
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    
+    if (hrs > 0) return `${hrs}h ${mins}m`;
+    return `${mins}m`;
+};
 
     const handleUpdateProfile = async () => {
         if (!newName.trim() || newName === currentUser?.displayName) { setIsEditing(false); return; }
@@ -217,6 +235,9 @@ const ProfilePage = () => {
                         <MiniStatCard icon={Type} label="Alphabets" value={stats?.stats.alphabetsLearned || 0} color="bg-pink-500" />
                         <MiniStatCard icon={Star} label="Spellings" value={stats?.stats.spellingsMastered || 0} color="bg-amber-500" />
                         <MiniStatCard icon={Hash} label="Numbers" value={stats?.stats.numbersLearned || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={Eye} label="Anomalies" value={stats?.stats.totalAnomaliesFound || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={XCircle} label="Wrong Picks" value={stats?.stats.wrongPicks || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={Clock} label="Time Spent" value={formatTime(stats?.stats.totalTimeSpent || 0)} color="bg-indigo-500" />
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 md:gap-4">
@@ -225,21 +246,21 @@ const ProfilePage = () => {
                                 <Flame className="text-orange-500" size={20} />
                                 <span className="text-xs md:text-sm font-bold text-white/60">Streak</span>
                             </div>
-                            <span className="text-xl md:text-2xl font-black">{stats?.stats.currentStreak || 0} Days</span>
+                            <span className="text-lg md:text-xl font-black">{stats?.stats.currentStreak || 0} Days</span>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl md:rounded-[2rem] flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Zap className="text-yellow-400" size={20} />
                                 <span className="text-xs md:text-sm font-bold text-white/60">Score</span>
                             </div>
-                            <span className="text-xl md:text-2xl font-black">{stats?.score || 0}</span>
+                            <span className="text-lg md:text-xl font-black">{stats?.totalXp || 0}</span>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-2xl md:rounded-[2rem] flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Sparkles className="text-primary" size={20} />
                                 <span className="text-xs md:text-sm font-bold text-white/60">Games</span>
                             </div>
-                            <span className="text-xl md:text-2xl font-black">{stats?.stats.gamesPlayed || 0}</span>
+                            <span className="text-lg md:text-xl font-black">{stats?.stats.gamesPlayed || 0}</span>
                         </div>
                     </div>
                 </div>

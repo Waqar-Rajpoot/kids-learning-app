@@ -54,6 +54,7 @@ import { NumberManagement } from "./pages/admin/NumberManagement";
 import { SpellingManagement } from "./pages/admin/SpellingManagement";
 import { PoemManagement } from "./pages/admin/PoemsManagement";
 import { LearningManagement } from "./pages/admin/LearningManagement";
+import { StatsService } from "./services/statsService";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const AppContent = () => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // Runs every time the page changes
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -100,6 +102,31 @@ const AppContent = () => {
     };
   }, [showWelcome]);
 
+  const isAdmin = role === "admin";
+
+  // Inside AppContent in App.tsx
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const startTime = Date.now();
+
+    // This function saves the time spent when the user leaves the app or closes a page
+    const updateActiveTime = async () => {
+      const endTime = Date.now();
+      const secondsSpent = Math.floor((endTime - startTime) / 1000);
+
+      if (secondsSpent > 0) {
+        // We pass 0 for points and null for activity because this is just a heartbeat update
+        await StatsService.updateUserStats(0, null, true, undefined, secondsSpent);
+      }
+    };
+
+    // Clean up: Update when the component unmounts (user navigates away/closes)
+    return () => {
+      updateActiveTime();
+    };
+  }, [user, isAdmin]);
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#0f172a]">
@@ -110,7 +137,6 @@ const AppContent = () => {
     );
   }
 
-  const isAdmin = role === "admin";
 
   return (
     <TooltipProvider>
@@ -131,15 +157,15 @@ const AppContent = () => {
               <div className="flex-1 flex flex-col relative overflow-hidden">
                 <Routes>
                   {/* PUBLIC ROUTES */}
-                  <Route 
-                    path="/login" 
+                  <Route
+                    path="/login"
                     element={
                       !user ? <LoginForm /> : <Navigate to={isAdmin ? "/admin" : "/"} replace />
-                    } 
+                    }
                   />
-                  <Route 
-                    path="/register" 
-                    element={!user ? <RegisterForm /> : <Navigate to="/" replace />} 
+                  <Route
+                    path="/register"
+                    element={!user ? <RegisterForm /> : <Navigate to="/" replace />}
                   />
 
                   {!user ? (
@@ -159,7 +185,7 @@ const AppContent = () => {
                       <Route path="/admin/spellings" element={<AdminRoute><SpellingManagement /></AdminRoute>} />
                       <Route path="/admin/poems" element={<AdminRoute><PoemManagement /></AdminRoute>} />
                       <Route path="/admin/learning" element={<AdminRoute><LearningManagement /></AdminRoute>} />
-                      
+
                       {/* CATCH-ALL FOR ADMIN: If they hit root / or a user route, force them back to /admin */}
                       <Route path="/" element={<Navigate to="/admin" replace />} />
                       <Route path="*" element={<Navigate to="/admin" replace />} />
@@ -183,7 +209,7 @@ const AppContent = () => {
                       <Route path="/numbers" element={<NumbersPage />} />
                       <Route path="/drawing" element={<DrawingPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
-                      
+
                       {/* CATCH-ALL FOR USER: Block access to admin routes */}
                       <Route path="/admin/*" element={<Navigate to="/" replace />} />
                       <Route path="*" element={<NotFound />} />

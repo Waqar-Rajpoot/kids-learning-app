@@ -5,7 +5,6 @@ import {
   arrayUnion,
   serverTimestamp,
   getDoc,
-  setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 
@@ -61,6 +60,7 @@ export const StatsService = {
     activityId: string | null,
     isCorrect: boolean,
     category?: StatCategory,
+    secondsSpent: number = 0,
   ) => {
     const user = auth.currentUser;
     if (!user) return;
@@ -68,13 +68,37 @@ export const StatsService = {
     const userRef = doc(db, "users", user.uid);
 
     try {
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
       const updateData: any = {
         score: increment(points),
         xp: increment(points),
         "stats.gamesPlayed": increment(1),
         "stats.lastActive": serverTimestamp(),
+        "stats.totalTimeSpent": increment(secondsSpent),
         "stats.wrongPicks": isCorrect ? increment(0) : increment(1),
       };
+
+      if (userData?.stats?.lastActive) {
+        const lastActive = userData.stats.lastActive.toDate();
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const isSameDay = lastActive.toDateString() === today.toDateString();
+        const isYesterday = lastActive.toDateString() === yesterday.toDateString();
+
+        if (!isSameDay) {
+          if (isYesterday) {
+            updateData["stats.currentStreak"] = increment(1);
+          } else {
+            updateData["stats.currentStreak"] = 1; // Reset if they missed a day
+          }
+        }
+      } else {
+        updateData["stats.currentStreak"] = 1; // First time ever
+      }
 
       if (isCorrect && activityId) {
         updateData.completedLevels = arrayUnion(activityId);
