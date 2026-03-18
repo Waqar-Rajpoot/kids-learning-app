@@ -44,22 +44,30 @@ export const AuthService = {
           xp: 0,
           level: 1,
           rank: "Rookie",
-          completedLevels: [], 
+          completedLevels: [],
+          completedDays: [],
+          completedMonths: [],
+          learningProgress: {
+            daysMastered: 0,
+            monthsMastered: 0,
+          },
           stats: {
             totalAnomaliesFound: 0,
-            wrongPicks: 0, 
+            wrongPicks: 0,
             gamesPlayed: 0,
             poemsRead: 0,
-            drawingsCreated: 0, 
-            spellingsMastered: 0, 
-            numbersLearned: 0, 
-            alphabetsLearned: 0, 
+            drawingsCreated: 0,
+            spellingsMastered: 0,
+            numbersLearned: 0,
+            alphabetsLearned: 0,
+            daysLearned: 0,    
+            monthsLearned: 0,
             lastActive: serverTimestamp(),
-            currentStreak: 0, 
+            currentStreak: 0,
             totalTimeSpent: 0,
           },
 
-          badges: [], 
+          badges: [],
           settings: {
             musicEnabled: true,
             soundEnabled: true,
@@ -83,7 +91,9 @@ export const AuthService = {
       const userData = userDoc.data();
       if (userData.isBlocked) {
         await signOut(auth);
-        throw new Error("Your account has been blocked by the admin. Please contact support.");
+        throw new Error(
+          "Your account has been blocked by the admin. Please contact support.",
+        );
       }
     }
     return user;
@@ -95,7 +105,7 @@ export const AuthService = {
     await updateProfile(user, { displayName: newName });
     const userDocRef = doc(db, "users", user.uid);
     await updateDoc(userDocRef, {
-      displayName: newName, 
+      displayName: newName,
     });
   },
 

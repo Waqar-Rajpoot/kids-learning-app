@@ -41,6 +41,8 @@ interface FullUserStats {
         alphabetsLearned: number;
         gamesPlayed: number;
         currentStreak: number;
+        daysLearned: number;
+        monthsLearned: number;
         totalTimeSpent: number;
         totalAnomaliesFound: number;
         wrongPicks: number;
@@ -237,6 +239,8 @@ const ProfilePage = () => {
                         <MiniStatCard icon={Hash} label="Numbers" value={stats?.stats.numbersLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Eye} label="Anomalies" value={stats?.stats.totalAnomaliesFound || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={XCircle} label="Wrong Picks" value={stats?.stats.wrongPicks || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={XCircle} label="Days Learned" value={stats?.stats.daysLearned || 0} color="bg-emerald-500" />
+                        <MiniStatCard icon={XCircle} label="Months Learned" value={stats?.stats.monthsLearned || 0} color="bg-emerald-500" />
                         <MiniStatCard icon={Clock} label="Time Spent" value={formatTime(stats?.stats.totalTimeSpent || 0)} color="bg-indigo-500" />
                     </div>
 

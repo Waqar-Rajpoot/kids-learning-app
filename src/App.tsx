@@ -24,7 +24,7 @@ import NotFound from "./pages/NotFound";
 import "./lib/androidInit";
 
 // User Pages
-import Index from "./pages/Index";
+import UserDashboard from "./pages/UserDahsboard";
 import AnimalsPage from "./pages/AnimalsPage";
 import PoemsPage from "./pages/PoemsPage";
 import GamesMenuPage from "./pages/GamesMenuPage";
@@ -39,6 +39,9 @@ import NumbersPage from "./pages/NumbersPage";
 import DrawingPage from "./pages/DrawingPage";
 import ItemDetailPage from "./pages/ItemDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import DaysPage from "./pages/DaysLearning";
+import MonthsPage from "./pages/MonthsLearning";
+import Leaderboard  from "./pages/Leaderboard";
 
 // Admin Pages
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -55,6 +58,8 @@ import { SpellingManagement } from "./pages/admin/SpellingManagement";
 import { PoemManagement } from "./pages/admin/PoemsManagement";
 import { LearningManagement } from "./pages/admin/LearningManagement";
 import { StatsService } from "./services/statsService";
+import DaysManagement from "./pages/admin/DaysManagement";
+import MonthsManagement from "./pages/admin/MonthsManagement";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +68,6 @@ const AppContent = () => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  // Runs every time the page changes
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -104,24 +108,20 @@ const AppContent = () => {
 
   const isAdmin = role === "admin";
 
-  // Inside AppContent in App.tsx
   useEffect(() => {
     if (!user || isAdmin) return;
 
     const startTime = Date.now();
 
-    // This function saves the time spent when the user leaves the app or closes a page
     const updateActiveTime = async () => {
       const endTime = Date.now();
       const secondsSpent = Math.floor((endTime - startTime) / 1000);
 
       if (secondsSpent > 0) {
-        // We pass 0 for points and null for activity because this is just a heartbeat update
         await StatsService.updateUserStats(0, null, true, undefined, secondsSpent);
       }
     };
 
-    // Clean up: Update when the component unmounts (user navigates away/closes)
     return () => {
       updateActiveTime();
     };
@@ -185,6 +185,8 @@ const AppContent = () => {
                       <Route path="/admin/spellings" element={<AdminRoute><SpellingManagement /></AdminRoute>} />
                       <Route path="/admin/poems" element={<AdminRoute><PoemManagement /></AdminRoute>} />
                       <Route path="/admin/learning" element={<AdminRoute><LearningManagement /></AdminRoute>} />
+                      <Route path="/admin/days" element={<AdminRoute><DaysManagement /></AdminRoute>} />
+                      <Route path="/admin/months" element={<AdminRoute><MonthsManagement /></AdminRoute>} />
 
                       {/* CATCH-ALL FOR ADMIN: If they hit root / or a user route, force them back to /admin */}
                       <Route path="/" element={<Navigate to="/admin" replace />} />
@@ -192,7 +194,7 @@ const AppContent = () => {
                     </>
                   ) : (
                     <>
-                      <Route path="/" element={<Index />} />
+                      <Route path="/" element={<UserDashboard />} />
                       <Route path="/animals" element={<AnimalsPage />} />
                       <Route path="/birds" element={<AnimalsPage />} />
                       <Route path="/fruits" element={<AnimalsPage />} />
@@ -209,6 +211,9 @@ const AppContent = () => {
                       <Route path="/numbers" element={<NumbersPage />} />
                       <Route path="/drawing" element={<DrawingPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/days" element={<DaysPage />} />
+                      <Route path="/months" element={<MonthsPage />} />
+                      <Route path="/leaderboard" element={<Leaderboard />} />
 
                       {/* CATCH-ALL FOR USER: Block access to admin routes */}
                       <Route path="/admin/*" element={<Navigate to="/" replace />} />

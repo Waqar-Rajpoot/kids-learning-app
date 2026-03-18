@@ -13,6 +13,8 @@ import {
   Trophy,
   Zap,
   User,
+  ChevronRight,
+  TrendingUp,
 } from "lucide-react";
 import ModuleCard from "@/components/ModuleCard";
 import { motion } from "framer-motion";
@@ -30,7 +32,23 @@ const modules = [
     emoji: "🅰️",
   },
   {
-    title: "Logic Games",
+    title: "Numbers",
+    description: "Count 1 to 10",
+    path: "/numbers",
+    colorClass: "bg-yellow-400",
+    Icon: Hash,
+    emoji: "🔢",
+  },
+  {
+    title: "Spelling",
+    description: "Play with letters",
+    path: "/spelling",
+    colorClass: "bg-emerald-500",
+    Icon: Type,
+    emoji: "✏️",
+  },
+  {
+    title: "Logics",
     description: "Puzzles & Colors",
     path: "/puzzles",
     colorClass: "bg-blue-500",
@@ -46,7 +64,7 @@ const modules = [
     emoji: "🐼",
   },
   {
-    title: "Poems",
+    title: "Poems Library",
     description: "10 Story Books",
     path: "/poems",
     colorClass: "bg-indigo-600",
@@ -54,12 +72,20 @@ const modules = [
     emoji: "🧙",
   },
   {
-    title: "Numbers",
-    description: "Count 1 to 10",
-    path: "/numbers",
-    colorClass: "bg-yellow-400",
+    title: "Days Learning",
+    description: "Learn about days of the week",
+    path: "/days",
+    colorClass: "bg-cyan-500",
     Icon: Hash,
-    emoji: "🔢",
+    emoji: "📅",
+  },
+  {
+    title: "Months Learning",
+    description: "Learn about months of the year",
+    path: "/months",
+    colorClass: "bg-rose-500",
+    Icon: Hash,
+    emoji: "📆",
   },
   {
     title: "Drawing",
@@ -69,22 +95,13 @@ const modules = [
     Icon: Palette,
     emoji: "🎨",
   },
-  {
-    title: "Spelling",
-    description: "Play with letters",
-    path: "/spelling",
-    colorClass: "bg-emerald-500",
-    Icon: Type,
-    emoji: "✏️",
-  },
 ];
 
-const Index = () => {
+const UserDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const userName = auth.currentUser?.displayName || "Explorer";
 
-  // Initialize and Fetch Stats
   useEffect(() => {
     const fetchStats = async () => {
       const currentStats = await StatsService.initStats();
@@ -117,9 +134,16 @@ const Index = () => {
         </div>
 
         <div className="flex gap-2">
+          {/* Quick Access Leaderboard Button */}
+          <button
+            onClick={() => { playTap(); navigate("/leaderboard"); }}
+            className="p-3 bg-purple-500/10 backdrop-blur-md border border-purple-500/20 rounded-2xl hover:bg-purple-500/20 transition-all text-purple-400 hidden sm:flex"
+          >
+            <Trophy className="w-6 h-6" />
+          </button>
           <button
             onClick={() => { playTap(); navigate("/profile"); }}
-            className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all active:scale-95 text-white/70"
+            className="p-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-white/70"
           >
             <User className="w-6 h-6" />
           </button>
@@ -127,14 +151,13 @@ const Index = () => {
       </header>
 
       <main className="relative px-4 max-w-5xl mx-auto space-y-6 pb-24 z-10">
-        {/* Aesthetic Welcome Banner with Live Stats */}
+        {/* Welcome Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-8 transition-all hover:border-white/20 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-
           <div className="relative z-10">
             <h2 className="text-3xl font-black mb-2 font-display text-white tracking-tight italic">
               Hi, <span className="text-primary">{userName}</span>!
@@ -144,7 +167,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Quick Stats Grid */}
           <div className="relative z-10 flex gap-4 w-full md:w-auto">
             <div className="flex-1 md:flex-none px-6 py-3 bg-black/40 rounded-3xl border border-white/5 flex flex-col items-center">
               <div className="flex items-center gap-2 text-orange-500 mb-1">
@@ -154,13 +176,40 @@ const Index = () => {
               <span className="text-[8px] font-black uppercase text-white/30 tracking-widest">Total XP</span>
             </div>
 
-            <div className="flex-1 md:flex-none px-6 py-3 bg-black/40 rounded-3xl border border-white/5 flex flex-col items-center">
+            <div 
+              onClick={() => navigate("/leaderboard")}
+              className="flex-1 md:flex-none px-6 py-3 bg-black/40 rounded-3xl border border-white/5 flex flex-col items-center cursor-pointer hover:bg-primary/10 transition-colors"
+            >
               <div className="flex items-center gap-2 text-primary mb-1">
                 <Trophy className="w-4 h-4" />
                 <span className="text-xl font-black tracking-tighter">#{stats?.rank || "--"}</span>
               </div>
               <span className="text-[8px] font-black uppercase text-white/30 tracking-widest">Global Rank</span>
             </div>
+          </div>
+        </motion.div>
+
+        {/* --- SEPARATE LEADERBOARD PROMO SECTION --- */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => { playTap(); navigate("/leaderboard"); }}
+          className="relative group cursor-pointer overflow-hidden rounded-[2rem] border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 p-1 transition-all hover:border-purple-500/40"
+        >
+          <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-[1.8rem] p-5 flex items-center justify-between">
+             <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-500 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-black uppercase italic text-sm tracking-wider text-white">Challenger Board</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">See who is the top explorer today!</p>
+                </div>
+             </div>
+             <div className="flex items-center gap-2 text-purple-400 font-black italic text-xs uppercase group-hover:gap-4 transition-all">
+                View All <ChevronRight size={16} />
+             </div>
           </div>
         </motion.div>
 
@@ -171,7 +220,7 @@ const Index = () => {
               key={module.path + idx}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
+              transition={{ delay: 0.3 + (idx * 0.05) }}
               className={idx === 0 ? "sm:col-span-2" : ""}
             >
               <ModuleCard
@@ -191,4 +240,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default UserDashboard;

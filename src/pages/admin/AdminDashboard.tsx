@@ -23,6 +23,8 @@ const adminModules = [
   { title: "Numeric Core", path: "numbers", icon: Hash, color: "text-green-400", desc: "Counting & math modules" },
   { title: "Spelling Unit", path: "spellings", icon: BookText, color: "text-violet-400", desc: "Vocabulary & word logic" },
   { title: "Matching Logic", path: "matching", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
+  { title: "Days of the Week", path: "days", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
+  { title: "Months of the Year", path: "months", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
 ];
 
 export const AdminDashboard = () => {
