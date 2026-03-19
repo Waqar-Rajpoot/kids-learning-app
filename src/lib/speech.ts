@@ -42,7 +42,20 @@ const audioMap: Record<string, string> = {
   'blue': '/audio/color/blue.mp3', 'yellow': '/audio/color/yellow.mp3',
   'orange': '/audio/color/orange.mp3', 'pink': '/audio/color/pink.mp3',
   'purple': '/audio/color/purple.mp3', 'white': '/audio/color/white.mp3',
-  'black': '/audio/color/black.mp3', 'brown': '/audio/color/brown.mp3'
+  'black': '/audio/color/black.mp3', 'brown': '/audio/color/brown.mp3',
+  // Days (Optional MP3 mapping - paths assume you will add these files)
+  'monday': '/audio/days/monday.mp3', 'tuesday': '/audio/days/tuesday.mp3',
+  'wednesday': '/audio/days/wednesday.mp3', 'thursday': '/audio/days/thursday.mp3',
+  'friday': '/audio/days/friday.mp3', 'saturday': '/audio/days/saturday.mp3',
+  'sunday': '/audio/days/sunday.mp3',
+
+  // Months (Optional MP3 mapping)
+  'january': '/audio/months/january.mp3', 'february': '/audio/months/february.mp3',
+  'march': '/audio/months/march.mp3', 'april': '/audio/months/april.mp3',
+  'may': '/audio/months/may.mp3', 'june': '/audio/months/june.mp3',
+  'july': '/audio/months/july.mp3', 'august': '/audio/months/august.mp3',
+  'september': '/audio/months/september.mp3', 'october': '/audio/months/october.mp3',
+  'november': '/audio/months/november.mp3', 'december': '/audio/months/december.mp3'
 };
 
 // Sound effect mappings for animals and birds

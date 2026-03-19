@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, CheckCircle2, Star, Trophy, Loader2, Zap, PlayCircle } from 'lucide-react';
 
-// --- NEW IMPORTS ---
+// --- UPDATED IMPORTS FOR MOBILE ---
 import { speakText } from '@/lib/speech';
 import { playTap, playPop } from '@/lib/sounds';
 
@@ -32,7 +32,8 @@ const DaysLearning = () => {
     const fetchDays = async () => {
       try {
         const data = await DaysAdminService.getDays();
-        setDays(data.sort((a: any, b: any = 0) => a.order - b.order));
+        // Keep the natural weekly order
+        setDays(data.sort((a: any, b: any) => a.order - b.order));
       } catch (error) {
         toast.error("The Caterpillar is hiding! Failed to load.");
       } finally {
@@ -44,29 +45,26 @@ const DaysLearning = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  // --- NEW SOUND FUNCTION ---
+  // --- MOBILE OPTIMIZED SOUND HANDLER ---
   const handlePlaySound = (dayName: string) => {
-    // 1. Immediately stop any current speech
-    window.speechSynthesis.cancel(); 
-    
-    // 2. Play the UI tap sound
+    // 1. playTap gives instant tactile audio feedback
     playTap();
     
-    // 3. Speak the new day
+    // 2. speakText uses Capacitor Native TTS or phonetic Web Fallback
     speakText(dayName);
   };
 
   const handleCompleteDay = async (dayId: string, dayName: string) => {
     if (!user) return toast.error("Log in to save your progress!");
     
-    // Play sound when clicking the play/complete button too
+    // Play sound when clicking the specific action button
     handlePlaySound(dayName);
-    playPop(); // Add a little extra "pop" for completion
 
     if (userData?.completedDays?.includes(dayId)) return;
 
     try {
       const userRef = doc(db, "users", user.uid);
+      
       await updateDoc(userRef, {
         "completedDays": arrayUnion(dayId),
         "score": increment(50),
@@ -75,6 +73,9 @@ const DaysLearning = () => {
         "learningProgress.daysMastered": increment(1),
         "stats.lastActive": new Date()
       });
+
+      // Reward sound for mastering the day
+      playPop(); 
 
       toast.success(`You learned ${dayName}!`, {
         description: "+50 Score & +25 XP",
@@ -146,9 +147,9 @@ const DaysLearning = () => {
                 <motion.div 
                   key={day.id}
                   layout
-                  // Click anywhere on the card to hear the sound
+                  // Sound triggers when tapping anywhere on the day card
                   onClick={() => handlePlaySound(day.name)}
-                  className={`group relative p-5 rounded-[2.5rem] border transition-all duration-300 cursor-pointer ${
+                  className={`group relative p-5 rounded-[2.5rem] border transition-all duration-300 cursor-pointer active:scale-95 touch-manipulation ${
                     isDone 
                     ? 'bg-slate-900/40 border-indigo-500/30 shadow-[0_0_25px_rgba(99,102,241,0.1)]' 
                     : 'bg-slate-900 border-slate-800'
@@ -156,7 +157,7 @@ const DaysLearning = () => {
                 >
                   <div className="flex items-center gap-5">
                     <div 
-                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-xl shrink-0 transition-transform group-hover:scale-110"
+                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-xl shrink-0 transition-transform"
                       style={{ 
                         backgroundColor: day.color,
                         boxShadow: `0 0 20px ${day.color}44`
@@ -175,7 +176,7 @@ const DaysLearning = () => {
                     {!isDone && (
                       <button 
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent duplicate sound from card onClick
+                          e.stopPropagation(); // Stops double voice trigger
                           handleCompleteDay(day.id, day.name);
                         }}
                         className="p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-lg transition-all active:scale-90"

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, CheckCircle2, Star, Trophy, Loader2, Sparkles } from 'lucide-react';
 
-// --- NEW IMPORTS ---
+// --- UPDATED IMPORTS ---
 import { speakText } from '@/lib/speech';
 import { playTap, playPop } from '@/lib/sounds';
 
@@ -34,7 +34,7 @@ const MonthsLearning = () => {
     const fetchContent = async () => {
       try {
         const data = await MonthsAdminService.getMonths();
-        // Sorting by order to ensure January comes first
+        // Sorting ensures months stay in calendar order (Jan-Dec)
         setMonths(data.sort((a: any, b: any) => a.order - b.order));
       } catch (error) {
         toast.error("Failed to load learning modules");
@@ -47,16 +47,17 @@ const MonthsLearning = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  // --- REUSABLE SOUND HANDLER ---
+  // --- OPTIMIZED SOUND HANDLER FOR MOBILE ---
   const handlePlaySound = (monthName: string) => {
-    // Cut the previous sound immediately
-    window.speechSynthesis.cancel();
-    playTap();
+    // playTap provides immediate haptic-like feedback on touch
+    playTap(); 
+    
+    // speakText now handles Native TTS via Capacitor or Web Fallback automatically
     speakText(monthName);
   };
 
   const handleLearnMonth = async (monthId: string, monthName: string) => {
-    // Play sound when the button is clicked
+    // 1. Play the month name sound
     handlePlaySound(monthName);
     
     if (!user) return toast.error("Please login to track progress!");
@@ -66,7 +67,6 @@ const MonthsLearning = () => {
     }
 
     try {
-      playPop(); // Extra sound for success
       const userRef = doc(db, "users", user.uid);
       
       await updateDoc(userRef, {
@@ -76,6 +76,9 @@ const MonthsLearning = () => {
         "stats.monthsLearned": increment(1),
         "stats.lastActive": new Date()
       });
+
+      // 2. Play success sound after DB update
+      playPop(); 
 
       toast.success(`Hooray! ${monthName} mastered!`, {
         description: "+100 Score added to your Academy profile",
@@ -144,11 +147,11 @@ const MonthsLearning = () => {
                 <motion.div 
                   key={month.id}
                   layout
-                  // Click the card to hear the name
+                  // Tapping the card plays the month name
                   onClick={() => handlePlaySound(month.name)}
-                  className={`group relative overflow-hidden p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer ${
+                  className={`group relative overflow-hidden p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer active:scale-[0.98] ${
                     isDone 
-                    ? 'bg-slate-900/40 border-green-500/20' 
+                    ? 'bg-slate-900/40 border-green-500/20 shadow-inner' 
                     : 'bg-slate-900 border-slate-800 hover:border-pink-500/40'
                   }`}
                 >
@@ -173,7 +176,7 @@ const MonthsLearning = () => {
 
                   <button 
                     onClick={(e) => {
-                      e.stopPropagation(); // Stop duplicate sound from card click
+                      e.stopPropagation(); // Prevents double sound trigger
                       handleLearnMonth(month.id, month.name);
                     }}
                     disabled={isDone}
