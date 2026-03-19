@@ -1,9 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'kids.learning.app',
-  appName: 'kids_learning_app',
-  webDir: 'dist'
+  appId: 'com.kidslearning.app',
+  appName: 'Kids Learning App',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https' 
+  }
 };
 
 export default config;
