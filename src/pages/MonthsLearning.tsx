@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, CheckCircle2, Star, Trophy, Loader2, Sparkles } from 'lucide-react';
 
-// --- UPDATED IMPORTS ---
 import { speakText } from '@/lib/speech';
 import { playTap, playPop } from '@/lib/sounds';
 
