@@ -1,4 +1,4 @@
-package kids.learning.app;
+package com.kidslearning.app;
 
 import com.getcapacitor.BridgeActivity;
 
