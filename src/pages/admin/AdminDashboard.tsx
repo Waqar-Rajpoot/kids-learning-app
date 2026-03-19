@@ -25,6 +25,7 @@ const adminModules = [
   { title: "Matching Logic", path: "matching", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
   { title: "Days of the Week", path: "days", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
   { title: "Months of the Year", path: "months", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
+  { title: "Maths Concepts", path: "math", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
 ];
 
 export const AdminDashboard = () => {

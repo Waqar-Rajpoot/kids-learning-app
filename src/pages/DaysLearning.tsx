@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, updateDoc, arrayUnion, increment, onSnapshot } from 'firebase/firestore';
@@ -7,6 +7,10 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, CheckCircle2, Star, Trophy, Loader2, Zap, PlayCircle } from 'lucide-react';
 
+// --- NEW IMPORTS ---
+import { speakText } from '@/lib/speech';
+import { playTap, playPop } from '@/lib/sounds';
+
 const DaysLearning = () => {
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
@@ -14,7 +18,6 @@ const DaysLearning = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Auth & User Data Sync
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
@@ -26,12 +29,10 @@ const DaysLearning = () => {
       }
     });
 
-    // 2. Fetch Days Content
     const fetchDays = async () => {
       try {
         const data = await DaysAdminService.getDays();
-        // Sort by order just in case the service doesn't
-        setDays(data.sort((a: any, b: any) => a.order - b.order));
+        setDays(data.sort((a: any, b: any = 0) => a.order - b.order));
       } catch (error) {
         toast.error("The Caterpillar is hiding! Failed to load.");
       } finally {
@@ -43,16 +44,32 @@ const DaysLearning = () => {
     return () => unsubscribeAuth();
   }, []);
 
+  // --- NEW SOUND FUNCTION ---
+  const handlePlaySound = (dayName: string) => {
+    // 1. Immediately stop any current speech
+    window.speechSynthesis.cancel(); 
+    
+    // 2. Play the UI tap sound
+    playTap();
+    
+    // 3. Speak the new day
+    speakText(dayName);
+  };
+
   const handleCompleteDay = async (dayId: string, dayName: string) => {
     if (!user) return toast.error("Log in to save your progress!");
+    
+    // Play sound when clicking the play/complete button too
+    handlePlaySound(dayName);
+    playPop(); // Add a little extra "pop" for completion
+
     if (userData?.completedDays?.includes(dayId)) return;
 
     try {
       const userRef = doc(db, "users", user.uid);
-      
       await updateDoc(userRef, {
         "completedDays": arrayUnion(dayId),
-        "score": increment(50), // Days are shorter, so smaller reward
+        "score": increment(50),
         "xp": increment(25),
         "stats.daysLearned": increment(1),
         "learningProgress.daysMastered": increment(1),
@@ -129,14 +146,15 @@ const DaysLearning = () => {
                 <motion.div 
                   key={day.id}
                   layout
-                  className={`group relative p-5 rounded-[2.5rem] border transition-all duration-300 ${
+                  // Click anywhere on the card to hear the sound
+                  onClick={() => handlePlaySound(day.name)}
+                  className={`group relative p-5 rounded-[2.5rem] border transition-all duration-300 cursor-pointer ${
                     isDone 
                     ? 'bg-slate-900/40 border-indigo-500/30 shadow-[0_0_25px_rgba(99,102,241,0.1)]' 
                     : 'bg-slate-900 border-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-5">
-                    {/* Segment Circle */}
                     <div 
                       className="w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-xl shrink-0 transition-transform group-hover:scale-110"
                       style={{ 
@@ -156,7 +174,10 @@ const DaysLearning = () => {
 
                     {!isDone && (
                       <button 
-                        onClick={() => handleCompleteDay(day.id, day.name)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent duplicate sound from card onClick
+                          handleCompleteDay(day.id, day.name);
+                        }}
                         className="p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-lg transition-all active:scale-90"
                       >
                         <PlayCircle size={20} />

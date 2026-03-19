@@ -6,8 +6,8 @@ import {
 } from 'firebase/firestore';
 import { 
   Trophy, Star, Target, CheckCircle2, 
-  ArrowRight, Brain, Zap, HelpCircle, Loader2,
-  ArrowLeft // Added for the back button
+  ArrowRight, Zap, HelpCircle, Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
@@ -229,7 +229,7 @@ const MathQuest = () => {
                 <AnimatePresence>
                   {showHint && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-3 overflow-hidden">
-                      <p className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 text-slate-400 text-sm font-medium italic text-center italic">
+                      <p className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 text-slate-400 text-sm font-medium italic text-center">
                         {currentProb.hint}
                       </p>
                     </motion.div>

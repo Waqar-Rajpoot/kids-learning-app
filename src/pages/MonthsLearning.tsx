@@ -7,6 +7,10 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, CheckCircle2, Star, Trophy, Loader2, Sparkles } from 'lucide-react';
 
+// --- NEW IMPORTS ---
+import { speakText } from '@/lib/speech';
+import { playTap, playPop } from '@/lib/sounds';
+
 const MonthsLearning = () => {
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
@@ -14,12 +18,9 @@ const MonthsLearning = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Listen for Auth State
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
       if (currentUser) {
-        // 2. Real-time User Data (Progress/Score)
         const userRef = doc(db, "users", currentUser.uid);
         const unsubscribeUser = onSnapshot(userRef, (snapshot) => {
           if (snapshot.exists()) {
@@ -30,11 +31,11 @@ const MonthsLearning = () => {
       }
     });
 
-    // 3. Fetch Month Content
     const fetchContent = async () => {
       try {
         const data = await MonthsAdminService.getMonths();
-        setMonths(data);
+        // Sorting by order to ensure January comes first
+        setMonths(data.sort((a: any, b: any) => a.order - b.order));
       } catch (error) {
         toast.error("Failed to load learning modules");
       } finally {
@@ -46,15 +47,26 @@ const MonthsLearning = () => {
     return () => unsubscribeAuth();
   }, []);
 
+  // --- REUSABLE SOUND HANDLER ---
+  const handlePlaySound = (monthName: string) => {
+    // Cut the previous sound immediately
+    window.speechSynthesis.cancel();
+    playTap();
+    speakText(monthName);
+  };
+
   const handleLearnMonth = async (monthId: string, monthName: string) => {
+    // Play sound when the button is clicked
+    handlePlaySound(monthName);
+    
     if (!user) return toast.error("Please login to track progress!");
 
-    // Prevent double-clicking or re-learning
     if (userData?.completedMonths?.includes(monthId)) {
       return toast.info(`You already mastered ${monthName}!`);
     }
 
     try {
+      playPop(); // Extra sound for success
       const userRef = doc(db, "users", user.uid);
       
       await updateDoc(userRef, {
@@ -122,7 +134,7 @@ const MonthsLearning = () => {
           </div>
         </div>
 
-        {/* Content List - Forced Single Column */}
+        {/* Content List */}
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
             {months.map((month) => {
@@ -132,14 +144,15 @@ const MonthsLearning = () => {
                 <motion.div 
                   key={month.id}
                   layout
-                  className={`group relative overflow-hidden p-6 rounded-[2.5rem] border transition-all duration-500 ${
+                  // Click the card to hear the name
+                  onClick={() => handlePlaySound(month.name)}
+                  className={`group relative overflow-hidden p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer ${
                     isDone 
                     ? 'bg-slate-900/40 border-green-500/20' 
                     : 'bg-slate-900 border-slate-800 hover:border-pink-500/40'
                   }`}
                 >
                   <div className="flex items-center gap-6">
-                    {/* Circle Icon */}
                     <div 
                       className="w-16 h-16 rounded-full flex items-center justify-center text-white font-black text-2xl shadow-xl shrink-0"
                       style={{ 
@@ -158,9 +171,11 @@ const MonthsLearning = () => {
                     </div>
                   </div>
 
-                  {/* Dynamic Action Button */}
                   <button 
-                    onClick={() => handleLearnMonth(month.id, month.name)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Stop duplicate sound from card click
+                      handleLearnMonth(month.id, month.name);
+                    }}
                     disabled={isDone}
                     className={`w-full mt-6 py-4 rounded-2xl font-black uppercase italic transition-all flex items-center justify-center gap-3 active:scale-95 ${
                       isDone 

@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Volume2, Home, Eraser, Loader2 } from 'lucid
 import { speakText } from '@/lib/speech';
 import { playTap, playPop, playStar } from '@/lib/sounds';
 import { fireBasicConfetti } from '@/lib/confetti';
-import { motion } from 'framer-motion';
 
 // Firebase & Service Imports
 import { db } from '@/lib/firebase';

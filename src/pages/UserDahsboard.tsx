@@ -34,7 +34,7 @@ const modules = [
   },
   {
     title: "Numbers",
-    description: "Count 1 to 10",
+    description: "Learn to count & basic math",
     path: "/numbers",
     colorClass: "bg-yellow-400",
     Icon: Hash,
@@ -66,7 +66,7 @@ const modules = [
   },
   {
     title: "Poems Library",
-    description: "10 Story Books",
+    description: "Read poems",
     path: "/poems",
     colorClass: "bg-indigo-600",
     Icon: BookOpen,
