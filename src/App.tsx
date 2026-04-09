@@ -48,7 +48,6 @@ import MathQuest from "./pages/MathQuest";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { UserManagement } from "./pages/admin/UserManagement";
 import { AlphabetManagement } from "./pages/admin/AlphabetManagement";
-import { MatchingManagement } from "./pages/admin/MatchingManagement";
 import { MemoryManagement } from "./pages/admin/MemoryLevel";
 import { ColorManagement } from "./pages/admin/ColorManagement";
 import { ShadowManagement } from "./pages/admin/ShodowManagement";
@@ -177,7 +176,6 @@ const AppContent = () => {
                       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                       <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
                       <Route path="/admin/alphabets" element={<AdminRoute><AlphabetManagement /></AdminRoute>} />
-                      <Route path="/admin/matching" element={<AdminRoute><MatchingManagement /></AdminRoute>} />
                       <Route path="/admin/memory" element={<AdminRoute><MemoryManagement /></AdminRoute>} />
                       <Route path="/admin/colors" element={<AdminRoute><ColorManagement /></AdminRoute>} />
                       <Route path="/admin/shadows" element={<AdminRoute><ShadowManagement /></AdminRoute>} />

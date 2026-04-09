@@ -3,7 +3,8 @@ import {
   Users, BookText, Grid, Brain, Palette,
   Ghost, Box, AlertTriangle, Hash, Type,
   Music, BookOpen, ChevronRight, LayoutDashboard,
-  LogOut, ShieldCheck, Mail
+  LogOut, ShieldCheck, Mail,
+  Zap
 } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -22,10 +23,9 @@ const adminModules = [
   { title: "Anomaly Scan", path: "anomalies", icon: AlertTriangle, color: "text-red-400", desc: "Odd-one-out configurations" },
   { title: "Numeric Core", path: "numbers", icon: Hash, color: "text-green-400", desc: "Counting & math modules" },
   { title: "Spelling Unit", path: "spellings", icon: BookText, color: "text-violet-400", desc: "Vocabulary & word logic" },
-  { title: "Matching Logic", path: "matching", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
   { title: "Days of the Week", path: "days", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
   { title: "Months of the Year", path: "months", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
-  { title: "Maths Concepts", path: "math", icon: Grid, color: "text-amber-400", desc: "General pair configurations" },
+  { title: "Maths Concepts", path: "math", icon: Zap, color: "text-amber-400", desc: "General pair configurations" },
 ];
 
 export const AdminDashboard = () => {
