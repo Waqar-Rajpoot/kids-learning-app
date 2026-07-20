@@ -63,6 +63,7 @@
     "embla-carousel-react": "^8.5.1",
     "firebase": "^10.14.1",
     "framer-motion": "^11.15.0",
+    "git-filter-repo": "^0.0.30",
     "input-otp": "^1.4.1",
     "lucide-react": "^0.462.0",
     "mathjs": "^13.2.3",
