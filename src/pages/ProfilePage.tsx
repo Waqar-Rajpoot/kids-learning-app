@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import RecentActivityCard from '@/components/RecentActivityCard';
 
 interface FullUserStats {
     score: number;
@@ -232,6 +233,9 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
+
+                <RecentActivityCard />
+                
 
                 {/* 2. ACADEMY STATS SECTION (Mobile Optimized) */}
                 <div className="space-y-4">

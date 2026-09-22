@@ -269,7 +269,7 @@ const SpellingPage = () => {
                   onClick={nextWord}
                   className="flex-1 h-16 bg-emerald-500 text-white rounded-[1.5rem] font-black text-xl flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] active:scale-95 transition-all"
                 >
-                  Next Word
+                  Next
                   <ChevronRight className="w-6 h-6" />
                 </button>
               ) : (
